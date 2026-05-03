@@ -40,8 +40,8 @@ Dibangun menggunakan prinsip arsitektur *N-Tier* (Layered Architecture):
 - **Build Tool:** Apache Maven
 
 ### Frontend (Client-Side)
-- **Core Framework:** Angular 17/18 (dengan dukungan *Standalone Components* maupun *NgModules*)
-- **Desain & UI/UX:** Tailwind CSS (dengan palet warna *slate*, *indigo*, dan antarmuka *modern light mode*)
+- **Core Framework:** Angular 21 (*Zoneless Change Detection*, NgModules)
+- **Desain & UI/UX:** Custom CSS (dengan palet warna *slate*, *indigo*, dan antarmuka *modern light mode*)
 - **Komunikasi Data:** `HttpClientModule` dan `RxJS` Observables
 
 ### Mengapa Menggunakan Arsitektur Monolith, Bukan Microservice?
@@ -74,8 +74,7 @@ student-management-apps/
 │       └── config/           # Layer Bootstraping (DataInitializer - Auto Create Admin)
 │
 └── frontend/                 # CLIENT-SIDE ANGULAR
-    ├── angular.json          # Konfigurasi workspace Angular
-    ├── tailwind.config.js    # Konfigurasi utilitas dan tema Tailwind CSS
+    ├── angular.json          # Konfigurasi workspace Angular (SSR dinonaktifkan)
     ├── public/               # File statis dan aset grafis (Logo, favicon, dll)
     └── src/app/              # Kode utama aplikasi
         ├── auth/             # Logika Autentikasi (Service, Interceptor, Guard)
@@ -145,9 +144,21 @@ Setelah Anda membuka aplikasi di peramban, Anda akan dicegat oleh halaman Login 
 
 ## 🛠️ Penyelesaian Masalah Umum (Troubleshooting)
 
-* **Error "localStorage is not defined" di terminal Angular saat Build:**
-  Hal ini dapat terjadi apabila *Server Side Rendering (SSR) / Prerendering* bawaan Angular 17/18 aktif. Solusinya telah diterapkan pada aplikasi ini: File `app.routes.server.ts` telah dikonfigurasi untuk menggunakan `RenderMode.Client` untuk kompatibilitas penuh dengan sistem autentikasi lokal.
+* **Data tidak muncul di tabel / UI kosong:**
+  Angular 21 menggunakan *Zoneless Change Detection* secara default. Semua komponen harus menggunakan `ChangeDetectorRef.detectChanges()` setelah menerima data dari HTTP response. Hal ini sudah diterapkan pada semua komponen di aplikasi ini.
 * **Error CORS di peramban / Data gagal dimuat:**
-  Pastikan backend telah berhasil menyala di port `9090`. Konfigurasi CORS pada backend sudah dibuka untuk seluruh domain lokal (`@CrossOrigin`).
+  Pastikan backend telah berhasil menyala di port `9090`. Konfigurasi CORS dikelola secara terpusat melalui `SecurityConfig.java` (bukan `@CrossOrigin` per controller). Origin yang diizinkan: `http://localhost:*` dan `http://127.0.0.1:*`.
 * **Error Port Terpakai (Address already in use):**
   Jika port `9090` atau `4200` sudah dipakai oleh program lain, matikan program tersebut atau ubah port sementara di `application.properties` (untuk Spring Boot) atau jalankan `ng serve --port 4201` (untuk Angular).
+* **Error 403 saat PUT/POST Student:**
+  Jika muncul error 403 saat mengupdate atau menambah student, pastikan model `Student.java` tidak menggunakan `@JsonManagedReference` dan model `Project.java` menggunakan `@JsonIgnore` (bukan `@JsonBackReference`) pada field `students`. Anotasi `@JsonManagedReference`/`@JsonBackReference` tidak kompatibel dengan relasi `@ManyToMany`.
+* **SSR (Server-Side Rendering):**
+  SSR telah dinonaktifkan pada proyek ini (`angular.json` tidak memuat konfigurasi `server` dan `ssr`). Hal ini dilakukan untuk menghindari *hydration mismatch* yang menyebabkan data tidak tampil di browser.
+
+---
+
+## 📝 Catatan Teknis Penting
+
+* **Environment URL:** Semua service frontend (`student-api.ts`, `project-api.ts`, `auth.service.ts`) menggunakan `http://127.0.0.1:9090` sebagai base URL. Ini lebih stabil dibanding `localhost` pada macOS karena menghindari resolusi IPv6.
+* **Autentikasi:** Aplikasi menggunakan JWT Authentication (bukan OAuth). Token disimpan di `localStorage` browser dan dikirim otomatis melalui `AuthInterceptor`.
+* **Jackson Serialization:** Relasi `@ManyToMany` antara Student dan Project menggunakan `@JsonIgnore` pada sisi Project untuk mencegah infinite recursion, bukan `@JsonManagedReference`/`@JsonBackReference`.

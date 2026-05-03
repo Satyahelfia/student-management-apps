@@ -1,4 +1,17 @@
-@baseUrl = http://localhost:9090
+### ==========================================
+### API Documentation - Student Management App
+### ==========================================
+### Base URL menggunakan 127.0.0.1 (bukan localhost)
+### karena lebih stabil pada macOS (menghindari resolusi IPv6).
+###
+### Cara pakai:
+### 1. Jalankan request "Login" terlebih dahulu
+### 2. Copy token dari response
+### 3. Ganti nilai @token di bawah dengan token tersebut
+### 4. Jalankan request lainnya
+### ==========================================
+
+@baseUrl = http://127.0.0.1:9090
 @token = your_jwt_token_here
 
 ### ==========================================
