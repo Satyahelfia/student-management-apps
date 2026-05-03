@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { StudentApi } from '../student-api';
 
 @Component({
@@ -11,18 +11,20 @@ export class Assignment implements OnInit {
   assignmentResult:Map<String,String>= new Map()
 
   constructor(
-    private studentApi:StudentApi
+    private studentApi:StudentApi,
+    private cdr:ChangeDetectorRef
   ){}
   ngOnInit(): void {
     this.getAssignmentResult()
   }
 
   getAssignmentResult(){
-    this.studentApi.getStudentAssignment().subscribe(
-      data=>{
+    this.studentApi.getStudentAssignment().subscribe({
+      next: data => {
         this.assignmentResult=data
+        this.cdr.detectChanges();
       }
-    )
+    })
   }
 
 }

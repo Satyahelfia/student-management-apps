@@ -22,15 +22,14 @@ public class Student {
             joinColumns = @JoinColumn (name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    @JsonManagedReference
     @OrderColumn(name = "project_order")
-    private List<Project> projects;
+    private List<Project> projects = new java.util.ArrayList<>();
 
     public int getId() {
         return id;
     }
 
-    public List<Project> getProject() {
+    public List<Project> getProjects() {
         return projects;
     }
 
@@ -54,7 +53,7 @@ public class Student {
         this.average = average;
     }
 
-    public void setProject(List<Project> projects) {
+    public void setProjects(List<Project> projects) {
         this.projects = projects;
     }
 

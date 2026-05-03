@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { Student } from '../student';
 import { Project } from '../project';
 import { StudentApi } from '../student-api';
@@ -18,7 +18,8 @@ export class StudentProjects implements OnInit {
 
   constructor(
     private studentApi:StudentApi,
-    private activatedRoute:ActivatedRoute
+    private activatedRoute:ActivatedRoute,
+    private cdr:ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -28,36 +29,61 @@ export class StudentProjects implements OnInit {
     this.getStudentById();
   }
   getStudentById(){
-    this.studentApi.getStudentById(Number(this.student.id)).subscribe(
-      data=>{
-        this.student=data
-
+    console.log("Fetching student with ID:", this.student.id);
+    this.studentApi.getStudentById(Number(this.student.id)).subscribe({
+      next: data => {
+        console.log("Student data received:", data);
+        this.student = data;
         this.GetStudentAvailableProjects();
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error("Failed to fetch student by ID:", err);
+        alert("Failed to load student data! Check console.");
       }
-    )
+    });
   }
   GetStudentAvailableProjects(){
-    this.studentApi.getAvailableStudentProjects(this.student.id).subscribe(
-      data=>{
-        this.availableProjects=data
+    this.studentApi.getAvailableStudentProjects(this.student.id).subscribe({
+      next: data => {
+        console.log("Available projects received:", data);
+        this.availableProjects = data;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error("Failed to fetch available projects:", err);
       }
-    )
+    });
   }
   refreshPage(){
     this.getStudentById()
   }
   addProject(){
-    this.studentApi.addProjectToStudent(this.student.id, this.projectId).subscribe(
-      data=> {
-        this.refreshPage()
+    console.log("Assigning project ID:", this.projectId, "to student ID:", this.student.id);
+    if (!this.projectId) {
+      alert("Please select a project first!");
+      return;
+    }
+    this.studentApi.addProjectToStudent(this.student.id, this.projectId).subscribe({
+      next: data => {
+        console.log("Successfully assigned project:", data);
+        this.projectId = ""; // reset selection
+        this.refreshPage();
+      },
+      error: err => {
+        console.error("Failed to assign project:", err);
+        alert("Failed to assign project! Check console for details.");
       }
-    )
+    });
   }
   deleteProject(project_id:any){
-    this.studentApi.deleteProjectFromStudent(this.student.id, project_id).subscribe(
-      data=> {
-        this.refreshPage()
+    this.studentApi.deleteProjectFromStudent(this.student.id, project_id).subscribe({
+      next: data => {
+        this.refreshPage();
+      },
+      error: err => {
+        console.error("Failed to delete project:", err);
       }
-    )
+    });
   }
 }

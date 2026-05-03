@@ -1,5 +1,5 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { FormsModule } from '@angular/forms';
@@ -34,8 +34,7 @@ import { AuthInterceptor } from './auth.interceptor';
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    provideBrowserGlobalErrorListeners(),
-    provideClientHydration(withEventReplay()),
+    provideZonelessChangeDetection(),
   ],
   bootstrap: [App],
 })

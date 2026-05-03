@@ -11,7 +11,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 
 @RestController
-@CrossOrigin(origins = "${SPRING_ORIGINS:*}")
 @RequestMapping("/projects")
 
 public class ProjectController {

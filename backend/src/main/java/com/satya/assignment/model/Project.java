@@ -1,7 +1,7 @@
 package com.satya.assignment.model;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
@@ -13,9 +13,8 @@ public class Project{
     @Column(name="name")
     private String name;
 
-    // 🔥 TAMBAHKAN DI SINI
     @ManyToMany(mappedBy = "projects")
-    @JsonBackReference
+    @JsonIgnore
     private List<Student> students;
 
     public String getName() {

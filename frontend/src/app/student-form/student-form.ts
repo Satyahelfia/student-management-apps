@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { Student } from '../student';
 import { StudentApi } from '../student-api';
 import { OnInit } from '@angular/core';
@@ -18,16 +18,18 @@ export class StudentForm implements OnInit {
     private studentApi:StudentApi,
     private router:Router,
     private activeRoute:ActivatedRoute,
+    private cdr:ChangeDetectorRef
   ){     }
 
   ngOnInit(): void {
     this.id=this.activeRoute.snapshot.params["id"]
     if(this.id){
-      this.studentApi.getStudentById(this.id).subscribe(
-        data=>{
+      this.studentApi.getStudentById(this.id).subscribe({
+        next: data => {
           this.student=data;
+          this.cdr.detectChanges();
         }
-      )
+      })
     }
   }
 

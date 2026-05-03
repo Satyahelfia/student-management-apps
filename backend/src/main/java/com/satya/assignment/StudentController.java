@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "${SPRING_ORIGINS:*}")
 @RequestMapping("/students")
 public class StudentController{
     private static int maxProjectPerStudent=3;
@@ -34,36 +33,41 @@ public class StudentController{
      }
      public Student retieveStudentById(int id){
         return studentRepository.findById(id).orElseThrow(
-                ()-> new ExpressionException("Student with id "+id+" is not Found !")
+                ()-> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Student with id "+id+" is not Found !")
         );
      }
     public Project retieveProjectById(int id){
         return projectRepository.findById(id).orElseThrow(
-                ()-> new ExpressionException("Project with id "+id+" is not Found !")
+                ()-> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Project with id "+id+" is not Found !")
         );
     }
 
      @GetMapping ("/{id:\\d+}")
      public ResponseEntity<Student> getStudentByID(@PathVariable int id){
+         System.out.println("GET Student ID: " + id);
          return ResponseEntity.of(studentRepository.findById(id));
      }
 
      @PostMapping("/")
      public ResponseEntity<Student> createStudent(@RequestBody Student studentDetails){
+         System.out.println("POST Create Student: " + studentDetails.getName());
          Student savedStudent= studentRepository.save(studentDetails);
          return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
      }
 
      @PutMapping("/{id}")
      public ResponseEntity<Student> updateStudent( @PathVariable int id , @RequestBody Student studentDetails){
+        System.out.println("PUT Update Student ID: " + id);
         Student student= retieveStudentById(id);
         student.setName(studentDetails.getName());
         student.setAverage(studentDetails.getAverage());
-        studentRepository.save(student);
-        return ResponseEntity.ok(student);
+        Student updatedStudent = studentRepository.save(student);
+        System.out.println("Update success for ID: " + id);
+        return ResponseEntity.ok(updatedStudent);
      }
      @DeleteMapping("/{id}")
      public ResponseEntity<String> deleteStudent(@PathVariable int id){
+        System.out.println("DELETE Student ID: " + id);
         Student student= retieveStudentById(id);
         studentRepository.delete(student);
         return ResponseEntity.ok("Student deleted Successfully");
@@ -73,9 +77,11 @@ public class StudentController{
          return ResponseEntity.ok(maxProjectPerStudent);
      }
      @PutMapping("/config/max_projects")
-     public ResponseEntity<Integer> updateMaxProjectsPerStudent(@RequestBody int maximumNumber){
-         maxProjectPerStudent=maximumNumber;
-         return ResponseEntity.ok(maximumNumber);
+     public ResponseEntity<Integer> updateMaxProjectsPerStudent(@RequestBody(required = false) Integer maximumNumber){
+         if (maximumNumber != null && maximumNumber > 0) {
+             maxProjectPerStudent=maximumNumber;
+         }
+         return ResponseEntity.ok(maxProjectPerStudent);
     }
 
     // ============================ STUDENT PROJECT ===========================
@@ -83,22 +89,22 @@ public class StudentController{
     @GetMapping("/{student_id}/projects")
     public ResponseEntity<List<Project>> getProjectsByStudent(@PathVariable int student_id) {
         Student student = retieveStudentById(student_id);
-        return ResponseEntity.ok(student.getProject());
+        return ResponseEntity.ok(student.getProjects());
     }
 
     @PostMapping("/{student_id}/projects/{project_id}")
     public ResponseEntity<Student> addProjectToStudent(@PathVariable int student_id , @PathVariable int project_id){
          Student student= retieveStudentById(student_id);
          Project project= retieveProjectById(project_id);
-         for (Project p :student.getProject()){
+         for (Project p :student.getProjects()){
              if(p.getId() == project.getId()){
                  return ResponseEntity.status(400).body(student);
              }
          }
-         if (student.getProject().size()>=maxProjectPerStudent){
+         if (student.getProjects().size()>=maxProjectPerStudent){
              return ResponseEntity.badRequest().body(student);
         }
-         student.getProject().add(project);
+         student.getProjects().add(project);
          return ResponseEntity.status(HttpStatus.CREATED).body(studentRepository.save(student));
     }
 
@@ -106,20 +112,20 @@ public class StudentController{
     public ResponseEntity<Student> deleteProjectFromStudent(@PathVariable int student_id , @PathVariable int project_id){
         Student student= retieveStudentById(student_id);
         Project project= retieveProjectById(project_id);
-        student.getProject().remove(project);
+        student.getProjects().remove(project);
         return ResponseEntity.ok(studentRepository.save(student));
     }
 
-    @GetMapping("{student_id}/availableprojects")
+    @GetMapping("/{student_id}/availableprojects")
     public ResponseEntity<List<Project>> getStudentAvailableProject(@PathVariable int student_id){
          Student student = retieveStudentById(student_id);
          List<Project> availableProject = new ArrayList<Project>();
-         if (student.getProject().size() >=maxProjectPerStudent){
+         if (student.getProjects().size() >=maxProjectPerStudent){
              return ResponseEntity.ok(availableProject);
          }
          List<Project> allProjects= projectRepository.findAll();
          HashSet<Integer> projectIds= new HashSet<>();
-         for (Project p : student.getProject()){
+         for (Project p : student.getProjects()){
              projectIds.add(p.getId());
          }
          for (Project pro: allProjects){
@@ -142,7 +148,7 @@ public class StudentController{
          List<Student> listStudent = studentRepository.findAll();
          listStudent.sort(  (Student s1, Student s2)->  Double.compare(s2.getAverage(), s1.getAverage()));
          for (Student s:listStudent){
-             for (Project p:s.getProject()){
+             for (Project p:s.getProjects()){
                  if(projectIds.contains(p.getId())){
                      assignList.put(s.getName(),p.getName());
                      projectIds.remove(p.getId());
