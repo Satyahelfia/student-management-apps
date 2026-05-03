@@ -1,20 +1,27 @@
-<div class="mx-12">
-    <h3 class="mx-7">{{id ? "Update Student" : "Create Student"}}</h3>
+<div class="max-w-xl mx-auto">
+    <div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-xl p-8">
+        <h2 class="mb-6">{{id ? "Update Student" : "Create Student"}}</h2>
 
-    <form (ngSubmit)="upsert()" #f="ngForm" novalidate class="mt-4 mx-9 space-y-4">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="w-full" id="name" name="name" placeholder="enter your name" [(ngModel)]="student.name">
-        </div>
-        <div class="form-group">
-            <label for="average">Average</label>
-            <input type="number" class="w-full" id="average" name="average" placeholder="enter your average" [(ngModel)]="student.average">
-        </div>
-        <div class="form-group">
-            <label for="OutOfRange" class="text-red-900">
-                {{isOutOfRange ? "Average must be between 0 and 10" : ""}}
-            </label>
-        </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">{{id ? "Update" : "Submit"}}</button>
-    </form>
+        <form (ngSubmit)="upsert()" #f="ngForm" novalidate class="space-y-6">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter student's name" [(ngModel)]="student.name">
+            </div>
+            
+            <div>
+                <label for="average">Average</label>
+                <input type="number" id="average" name="average" placeholder="Enter student's average" [(ngModel)]="student.average">
+                <p *ngIf="isOutOfRange" class="mt-2 text-sm text-red-600">
+                    Average must be between 0 and 10.
+                </p>
+            </div>
+            
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <a [routerLink]="['/']" class="rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-colors duration-150 text-center inline-block">
+                    Cancel
+                </a>
+                <button type="submit">{{id ? "Update Student" : "Save Student"}}</button>
+            </div>
+        </form>
+    </div>
 </div>

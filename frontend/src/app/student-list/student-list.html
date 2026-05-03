@@ -1,44 +1,63 @@
-<h2 class="mb-4">
-    Student List
-    <a [routerLink]="['/students/addstudent']">
-        <i class="fa fa-user-plus interactivehover"></i>
-    </a>
-</h2>
+<div class="sm:flex sm:items-center mb-6">
+    <div class="sm:flex-auto">
+        <h2 class="!mb-0">Student List</h2>
+        <p class="mt-2 text-sm text-slate-700">A list of all students including their ID, name, average score, and actions.</p>
+    </div>
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <a [routerLink]="['/students/addstudent']" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <i class="fa fa-user-plus mr-1"></i> Add Student
+        </a>
+    </div>
+</div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Average</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden bg-white mb-8">
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Average</th>
+                <th class="relative px-6 py-3"><span class="sr-only">Edit</span></th>
+                <th class="relative px-6 py-3"><span class="sr-only">Projects</span></th>
+                <th class="relative px-6 py-3"><span class="sr-only">Delete</span></th>
+            </tr>
+        </thead>
+        <tbody>
             <tr *ngFor="let student of students">
                 <td>{{student.id}}</td>
-                <td>{{student.name}}</td>
+                <td class="font-medium text-slate-900">{{student.name}}</td>
                 <td>{{student.average}}</td>
-                <td class="interactivehover">
-                    <a [routerLink]="['/students/updatestudent', student.id]">
+                <td class="text-right text-sm font-medium">
+                    <a [routerLink]="['/students/updatestudent', student.id]" class="interactivehover">
                         <i class="fa fa-pencil"></i>
                     </a>
                 </td>
-                <td class="interactivehover">
-                    <a [routerLink]="['/students', student.id, 'projects']">
+                <td class="text-right text-sm font-medium">
+                    <a [routerLink]="['/students', student.id, 'projects']" class="interactivehover text-indigo-600 hover:text-indigo-900">
                         <i class="fa fa-tasks"></i>
                     </a>
                 </td>
-                <td class="interactivehover" (click)="deleteStudent(student.id)">
-                    <i class="fa fa-trash"></i>
+                <td class="text-right text-sm font-medium">
+                    <button class="interactivehover text-red-600 hover:text-red-900 bg-transparent border-0 p-0 shadow-none focus-visible:outline-none" (click)="deleteStudent(student.id)">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </td>
             </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
-<form (ngSubmit)="updateMaxProjectsPerStudent()" class="space-x-4">
-    <label for="maxProjectPerStudent" class="inline-block">
-        Max Projects Per Student {{maxProjectsPerStudent}}
-    </label>
-    <input type="number" min="2" step="1" name="maxProjectsPerStudent" [(ngModel)]="tempNumber">
-    <button type="submit">Submit</button>
-</form>
+<div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-lg p-6 max-w-lg">
+    <h3 class="text-lg font-medium leading-6 text-slate-900 mb-4">Settings</h3>
+    <form (ngSubmit)="updateMaxProjectsPerStudent()" class="flex items-end gap-4">
+        <div class="flex-grow">
+            <label for="maxProjectPerStudent">
+                Max Projects Per Student (Current: {{maxProjectsPerStudent}})
+            </label>
+            <input type="number" min="2" step="1" name="maxProjectsPerStudent" id="maxProjectPerStudent" [(ngModel)]="tempNumber" class="mt-1">
+        </div>
+        <div class="flex-shrink-0">
+            <button type="submit">Save</button>
+        </div>
+    </form>
+</div>

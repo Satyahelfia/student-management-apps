@@ -1,0 +1,154 @@
+@baseUrl = http://localhost:9090
+@token = your_jwt_token_here
+
+### ==========================================
+### 1. AUTHENTICATION
+### ==========================================
+
+# Login to get JWT Token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+
+
+### ==========================================
+### 2. STUDENTS API
+### ==========================================
+
+# Get all students
+GET {{baseUrl}}/students/
+Authorization: Bearer {{token}}
+
+###
+
+# Get student by ID
+GET {{baseUrl}}/students/1
+Authorization: Bearer {{token}}
+
+###
+
+# Create a new student
+POST {{baseUrl}}/students/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "John Doe",
+    "average": 8.5
+}
+
+###
+
+# Update a student
+PUT {{baseUrl}}/students/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "John Doe Updated",
+    "average": 9.2
+}
+
+###
+
+# Delete a student
+DELETE {{baseUrl}}/students/1
+Authorization: Bearer {{token}}
+
+###
+
+# Get config: max projects per student
+GET {{baseUrl}}/students/config/max_projects
+Authorization: Bearer {{token}}
+
+###
+
+# Update config: max projects per student
+PUT {{baseUrl}}/students/config/max_projects
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+5
+
+
+### ==========================================
+### 3. STUDENT - PROJECTS API
+### ==========================================
+
+# Get projects assigned to a student
+GET {{baseUrl}}/students/1/projects
+Authorization: Bearer {{token}}
+
+###
+
+# Assign a project to a student
+POST {{baseUrl}}/students/1/projects/2
+Authorization: Bearer {{token}}
+
+###
+
+# Remove a project from a student
+DELETE {{baseUrl}}/students/1/projects/2
+Authorization: Bearer {{token}}
+
+###
+
+# Get available projects for a student (projects they haven't taken yet)
+GET {{baseUrl}}/students/1/availableprojects
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### 4. PROJECTS API
+### ==========================================
+
+# Get all projects
+GET {{baseUrl}}/projects/
+Authorization: Bearer {{token}}
+
+###
+
+# Get project by ID
+GET {{baseUrl}}/projects/1
+Authorization: Bearer {{token}}
+
+###
+
+# Create a new project
+POST {{baseUrl}}/projects/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Web Development 101"
+}
+
+###
+
+# Update a project
+PUT {{baseUrl}}/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Advanced Web Development"
+}
+
+###
+
+# Delete a project
+DELETE {{baseUrl}}/projects/1
+Authorization: Bearer {{token}}
+
+
+### ==========================================
+### 5. ASSIGNMENT API
+### ==========================================
+
+# Auto-assign projects to students based on average score
+GET {{baseUrl}}/students/assignment
+Authorization: Bearer {{token}}

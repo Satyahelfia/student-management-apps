@@ -1,17 +1,26 @@
-<h2> Assignment Result </h2> 
+<div class="sm:flex sm:items-center mb-6">
+    <div class="sm:flex-auto">
+        <h2 class="!mb-0">Assignment Results</h2>
+        <p class="mt-2 text-sm text-slate-700">Overview of students and their assigned projects.</p>
+    </div>
+</div>
 
-<table>
-<thead>
-    <tr> 
-        <th>Student</th>
-        <th> Project</th>
-    </tr>
-</thead>
-<tbody>
-    <tr *ngFor="let item of assignmentResult | keyvalue">
-        <td> {{item.key}}</td>
-        <td>{{item.value}}</td>
-    </tr>
-</tbody>
-
-</table>
+<div class="shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden bg-white">
+    <table>
+        <thead>
+            <tr> 
+                <th>Student</th>
+                <th>Project</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of assignmentResult | keyvalue">
+                <td class="font-medium text-slate-900">{{item.key}}</td>
+                <td>{{item.value}}</td>
+            </tr>
+            <tr *ngIf="(assignmentResult | keyvalue)?.length === 0">
+                <td colspan="2" class="text-center text-slate-500 py-8">No assignments found.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

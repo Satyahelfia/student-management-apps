@@ -1,27 +1,42 @@
-<h2 class="mb-4">
-    Project List
+<div class="sm:flex sm:items-center mb-6">
+    <div class="sm:flex-auto">
+        <h2 class="!mb-0">Project List</h2>
+        <p class="mt-2 text-sm text-slate-700">A list of all available projects in the system.</p>
+    </div>
+</div>
 
-</h2>
-
-<table>
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden bg-white mb-8">
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th class="relative px-6 py-3"><span class="sr-only">Delete</span></th>
+            </tr>
+        </thead>
+        <tbody>
             <tr *ngFor="let project of projects">
                 <td>{{project.id}}</td>
-                <td>{{project.name}}</td>
-                <td class="interactivehover" (click)="deleteProject(project.id)">
-                    <i class="fa fa-trash"></i>
+                <td class="font-medium text-slate-900">{{project.name}}</td>
+                <td class="text-right text-sm font-medium">
+                    <button class="interactivehover text-red-600 hover:text-red-900 bg-transparent border-0 p-0 shadow-none focus-visible:outline-none" (click)="deleteProject(project.id)">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </td>
             </tr>
-    </tbody>
-</table>
-<form (ngSubmit)="addProject()" class="space-x-4">
-    <label for="ProjectCreation" class="inline-block">Add Project</label>
-    <input type="text" name="name" [(ngModel)]="project.name" class="inline-block">
-    <button type="submit" class="inline-block">Submit</button>
-</form>
+        </tbody>
+    </table>
+</div>
+
+<div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-lg p-6 max-w-lg">
+    <h3 class="text-lg font-medium leading-6 text-slate-900 mb-4">Add New Project</h3>
+    <form (ngSubmit)="addProject()" class="flex items-end gap-4">
+        <div class="flex-grow">
+            <label for="name">Project Name</label>
+            <input type="text" name="name" id="name" [(ngModel)]="project.name" class="mt-1" placeholder="Enter project name">
+        </div>
+        <div class="flex-shrink-0">
+            <button type="submit">Add</button>
+        </div>
+    </form>
+</div>

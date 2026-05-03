@@ -5,16 +5,18 @@ import { StudentForm } from './student-form/student-form';
 import { ProjectList } from './project-list/project-list';
 import { Assignment } from './assignment/assignment';
 import { StudentProjects } from './student-projects/student-projects';
-
+import { LoginComponent } from './login/login';
+import { AuthGuard } from './auth.guard';
 
 const routes: Routes = [
-  {path:"students",component:StudentList},
-  {path:"students/addstudent",component:StudentForm},
-  {path:"students/updatestudent/:id",component:StudentForm},
-  {path:"students/:id/projects",component:StudentProjects},
-  {path:"projects",component:ProjectList},
-  {path:"assignment",component:Assignment},
-  {path:"",redirectTo:"students",pathMatch:"full"}
+  {path: "login", component: LoginComponent},
+  {path: "students", component: StudentList, canActivate: [AuthGuard]},
+  {path: "students/addstudent", component: StudentForm, canActivate: [AuthGuard]},
+  {path: "students/updatestudent/:id", component: StudentForm, canActivate: [AuthGuard]},
+  {path: "students/:id/projects", component: StudentProjects, canActivate: [AuthGuard]},
+  {path: "projects", component: ProjectList, canActivate: [AuthGuard]},
+  {path: "assignment", component: Assignment, canActivate: [AuthGuard]},
+  {path: "", redirectTo: "students", pathMatch: "full"}
 ];
 
 @NgModule({
