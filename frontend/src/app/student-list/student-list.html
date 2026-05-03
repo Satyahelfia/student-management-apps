@@ -1,0 +1,44 @@
+<h2 class="mb-4">
+    Student List
+    <a [routerLink]="['/students/addstudent']">
+        <i class="fa fa-user-plus interactivehover"></i>
+    </a>
+</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Average</th>
+        </tr>
+    </thead>
+    <tbody>
+            <tr *ngFor="let student of students">
+                <td>{{student.id}}</td>
+                <td>{{student.name}}</td>
+                <td>{{student.average}}</td>
+                <td class="interactivehover">
+                    <a [routerLink]="['/students/updatestudent', student.id]">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                </td>
+                <td class="interactivehover">
+                    <a [routerLink]="['/students', student.id, 'projects']">
+                        <i class="fa fa-tasks"></i>
+                    </a>
+                </td>
+                <td class="interactivehover" (click)="deleteStudent(student.id)">
+                    <i class="fa fa-trash"></i>
+                </td>
+            </tr>
+    </tbody>
+</table>
+
+<form (ngSubmit)="updateMaxProjectsPerStudent()" class="space-x-4">
+    <label for="maxProjectPerStudent" class="inline-block">
+        Max Projects Per Student {{maxProjectsPerStudent}}
+    </label>
+    <input type="number" min="2" step="1" name="maxProjectsPerStudent" [(ngModel)]="tempNumber">
+    <button type="submit">Submit</button>
+</form>
