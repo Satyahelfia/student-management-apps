@@ -52,6 +52,45 @@ Saat ini, backend menggunakan pendekatan **Monolith** (seluruh modul digabung da
 
 ---
 
+## 📊 Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    student {
+        int id PK "AUTO_INCREMENT"
+        varchar name
+        double average
+    }
+
+    project {
+        int id PK "AUTO_INCREMENT"
+        varchar name
+    }
+
+    student_project {
+        int student_id FK
+        int project_id FK
+        int project_order
+    }
+
+    app_user {
+        bigint id PK "AUTO_INCREMENT"
+        varchar username
+        varchar password
+        varchar role
+    }
+
+    student ||--o{ student_project : "has"
+    project ||--o{ student_project : "assigned to"
+```
+
+### Penjelasan Relasi
+- **Student ↔ Project:** Relasi *Many-to-Many* melalui tabel penghubung `student_project`. Satu siswa dapat mengerjakan banyak proyek, dan satu proyek dapat dikerjakan oleh banyak siswa.
+- **student_project:** Tabel *junction/bridge* yang menyimpan pasangan `student_id` dan `project_id`, serta `project_order` untuk menjaga urutan proyek per siswa.
+- **AppUser:** Entitas terpisah untuk autentikasi (login). Tidak memiliki relasi langsung dengan Student atau Project.
+
+---
+
 ## 📂 Struktur Repositori Terperinci (Directory Structure)
 
 ```text
