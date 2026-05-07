@@ -18,9 +18,27 @@ export class ProjectApi {
   getProjectById(id:Number):Observable<Project>{
     return this.httpClient.get<Project>(this.link+id);
   }
-  addProject(Project:Project):Observable<Project>{
-    return this.httpClient.post<Project>(this.link,Project);
+  addProject(name: string, pdfFile?: File | null, imageFile?: File | null): Observable<Project> {
+    const formData = new FormData();
+    formData.append('name', name);
+    if (pdfFile) {
+      formData.append('pdf', pdfFile);
+    }
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+    return this.httpClient.post<Project>(this.link, formData);
   }
+
+  getPdfBlob(id: number): Observable<Blob> {
+    return this.httpClient.get(this.link + id + "/pdf", { responseType: 'blob' });
+  }
+
+  getImageBlob(id: number): Observable<Blob> {
+    return this.httpClient.get(this.link + id + "/image", { responseType: 'blob' });
+  }
+
+
   updateProject(id:Number,Project:Project){
     return this.httpClient.put<Project>(this.link+id,Project);
   }

@@ -10,21 +10,27 @@ Dikembangkan dengan memisahkan sisi *Client* (Frontend) dan *Server* (Backend), 
 
 ### 1. 🛡️ Modul Keamanan & Autentikasi (Security Module)
 - **JWT (JSON Web Token):** Sesi pengguna dikelola secara *stateless* menggunakan token JWT berstandar industri.
-- **Role-based Authentication:** Akses masuk saat ini dikhususkan bagi administrator.
-- **Route Protection:** Semua rute API (kecuali `/auth/login`) dilindungi secara ketat oleh `Spring Security Filter Chain` di backend. Di sisi frontend, rute dilindungi oleh `AuthGuard` dari Angular.
-- **HTTP Interceptor:** Token autentikasi disematkan secara otomatis (*intercepted*) ke dalam *Header HTTP Authorization* pada setiap permintaan dari peramban ke server.
+- **Role-based Authentication:** Mendukung multi-role terproteksi (`ADMIN` dan `STUDENT`). Administrator memiliki kontrol penuh atas manajemen data akademik, penugasan, dan penilaian. Siswa (`STUDENT`) memiliki portal khusus yang diproteksi untuk melihat daftar tugas serta mengunggah jawaban/tautan proyek (*Submissions*).
+- **Route Protection:** Semua rute API (kecuali `/auth/login` dan `/auth/register`) dilindungi secara ketat oleh `Spring Security Filter Chain` di backend. Di sisi frontend, rute dilindungi oleh `AuthGuard` dari Angular.
+- **HTTP Interceptor (Optimized):** Token autentikasi disematkan secara otomatis (*intercepted*) ke dalam *Header HTTP Authorization* pada setiap request. Menghapus ketergantungan melingkar (*circular dependency*) pada startup aplikasi dengan mengakses `localStorage` secara terpisah dari inisialisasi awal.
+- **Zero-DB Lookup JWT Filter:** Sistem mengekstrak klaim nama pengguna dan peran (`role`) langsung dari token JWT terenkripsi untuk merekonstruksi context keamanan Spring Security secara instan. Ini menghilangkan pemanggilan kueri database kueri (`findByUsername`) ke tabel user pada setiap pemanggilan API, sehingga meningkatkan performa respon backend secara dramatis.
 
 ### 2. 👥 Modul Manajemen Siswa (Student Module)
 - **Registrasi & Pendataan:** Menambah, mengubah, dan menghapus (*CRUD*) profil siswa beserta pencatatan skor rata-rata (*average score*).
 - **Pembatasan Proyek:** Administrator dapat mengonfigurasi batas maksimal kuota proyek yang diizinkan untuk diambil oleh setiap siswa (misal: maksimal 3 proyek per siswa).
 
-### 3. 📚 Modul Manajemen Proyek (Project Module)
+### 3. 📚 Modul Manajemen Proyek & Tugas (Project Module)
 - **Katalog Proyek:** Pengelolaan data master proyek (*CRUD* master data) yang nantinya dapat dipilih atau ditugaskan kepada siswa.
 
 ### 4. 🔗 Modul Penugasan & Relasi (Assignment & Enrollment Module)
 - **Enrollment Manual:** Administrator dapat memasukkan seorang siswa ke dalam proyek tertentu secara spesifik.
 - **Filter Proyek Tersedia:** Aplikasi pintar membedakan mana proyek yang sudah diambil dan mana yang belum diambil oleh seorang siswa.
 - **Smart Auto-Assignment:** Fitur canggih yang secara otomatis menugaskan sisa proyek ke para siswa. Penugasan otomatis ini diurutkan (*sorted*) berdasarkan peringkat nilai tertinggi (siswa paling berprestasi mendapatkan prioritas proyek pertama).
+
+### 5. 📝 Modul Pengumpulan & Penilaian (Submissions & Grading Module)
+- **Submission Portal (Student):** Siswa dapat menyertakan URL tautan (misalnya repositori GitHub) serta teks ringkasan untuk mengumpulkan pekerjaan proyek mereka.
+- **Grading & Feedback (Admin):** Administrator dapat menilai pekerjaan siswa, memberikan skor numerik secara instan, serta menyertakan umpan balik (*feedback*) tekstual yang mendalam. Nilai rata-rata siswa otomatis diperbarui ketika nilai proyek diberikan.
+
 
 ---
 
@@ -41,7 +47,7 @@ Dibangun menggunakan prinsip arsitektur *N-Tier* (Layered Architecture):
 
 ### Frontend (Client-Side)
 - **Core Framework:** Angular 21 (*Zoneless Change Detection*, NgModules)
-- **Desain & UI/UX:** Custom CSS (dengan palet warna *slate*, *indigo*, dan antarmuka *modern light mode*)
+- **Desain & UI/UX:** Custom CSS dengan antarmuka yang sangat premium dan interaktif. Mendukung **Dark Mode** dan **Light Mode** yang persisten (disimpan di `localStorage`), animasi halus, tabel yang bisa diurutkan secara interaktif (*Interactive Sorting*), dan **Pagination** pada sisi klien untuk menangani data berjumlah besar.
 - **Komunikasi Data:** `HttpClientModule` dan `RxJS` Observables
 
 ### Mengapa Menggunakan Arsitektur Monolith, Bukan Microservice?
@@ -104,12 +110,14 @@ student-management-apps/
 │   │   └── application.properties # Konfigurasi Database & Hibernate (PORT 9090)
 │   └── src/main/java/com/satya/assignment/
 │       ├── controller/       # Layer HTTP Endpoint (Routing & Request Handling)
+│       ├── service/          # Layer Logika Bisnis & Transaksi Database (Otak Aplikasi)
 │       ├── model/            # Layer Entitas JPA (Tabel Database)
 │       │   ├── AppUser.java  # Entitas Akun Administrator
 │       │   ├── Student.java  # Entitas Siswa
 │       │   └── Project.java  # Entitas Proyek
 │       ├── repository/       # Layer Komunikasi ke Database (CRUD Otomatis)
 │       ├── security/         # Layer Keamanan (Filter JWT, Config Security, dsb)
+
 │       └── config/           # Layer Bootstraping (DataInitializer - Auto Create Admin)
 │
 └── frontend/                 # CLIENT-SIDE ANGULAR
@@ -196,8 +204,21 @@ Setelah Anda membuka aplikasi di peramban, Anda akan dicegat oleh halaman Login 
 
 ---
 
-## 📝 Catatan Teknis Penting
+## 📝 Catatan Teknis & Optimasi Performa (Technical Notes & Optimizations)
 
+* **Zero-Database-Lookup JWT Filter (Keamanan & DB):** 
+  Autentikasi pada setiap *HTTP request* biasanya memicu kueri pencarian user ke database (`loadUserByUsername`). Di proyek ini, `JwtAuthenticationFilter` dioptimalkan untuk memuat data peran (`role`) langsung dari klaim payload token JWT. Ini memotong overhead kueri database untuk autentikasi menjadi **0 kueri**, membuat aplikasi sangat cepat menangani ribuan *request* konkuren.
+* **Resolusi Masalah N+1 Kueri JPA (Hibernate):**
+  Relasi `@ManyToMany` dengan mode EAGER pada entitas `Student` berpotensi memicu masalah N+1 kueri (1 kueri student memicu N kueri proyek tambahan). Kami mengoptimalkannya dengan menuliskan JPQL *Join Fetch* khusus di `StudentRepository.java`:
+  `@Query("SELECT DISTINCT s FROM Student s LEFT JOIN FETCH s.projects")`
+  Hal ini mereduksi kueri database penarikan grafik data siswa beserta daftar proyeknya menjadi tepat **1 kueri database tunggal**.
+* **RxJS `forkJoin` Stream Merging (Frontend Render):**
+  Pada zoneless Angular 21, setiap panggilan API asinkronus yang memicu `ChangeDetectorRef.detectChanges()` dapat menyebabkan siklus rendering ulang browser berulang-ulang secara beruntun. Kami mengoptimalkan halaman *Dashboard* dan *Student List* untuk menembakkan seluruh *HTTP request* secara pararel menggunakan RxJS `forkJoin` dan hanya memicu deteksi perubahan tepat **1 kali** setelah seluruh data selesai diterima.
+* **SPA Routing (`routerLink` vs `href`):**
+  Seluruh link navigasi internal di header dan dashboard menggunakan `routerLink` milik Angular. Hal ini menghindari terjadinya *full browser refresh* (pemuatan ulang halaman utuh) saat berpindah menu yang biasanya merusak state sesi aktif dan memicu bug otentikasi bootstrap awal.
 * **Environment URL:** Semua service frontend (`student-api.ts`, `project-api.ts`, `auth.service.ts`) menggunakan `http://127.0.0.1:9090` sebagai base URL. Ini lebih stabil dibanding `localhost` pada macOS karena menghindari resolusi IPv6.
 * **Autentikasi:** Aplikasi menggunakan JWT Authentication (bukan OAuth). Token disimpan di `localStorage` browser dan dikirim otomatis melalui `AuthInterceptor`.
 * **Jackson Serialization:** Relasi `@ManyToMany` antara Student dan Project menggunakan `@JsonIgnore` pada sisi Project untuk mencegah infinite recursion, bukan `@JsonManagedReference`/`@JsonBackReference`.
+* **Client-Side State Management (Frontend):** Fitur seperti pengurutan (*sorting*) tabel dan *pagination* diterapkan pada sisi *client* di memory (*in-memory processing*). Hal ini membuat transisi antar halaman tabel dan pengurutan data terasa seketika (0 ms) tanpa perlu melakukan *network roundtrip* ke server backend, memastikan pengalaman pengguna (*User Experience*) terbaik.
+* **Semantic CSS Variables untuk Theming:** Implementasi Dark Mode dan Light Mode dikembangkan dengan sangat elegan murni menggunakan *Native CSS Custom Properties* (variabel CSS) pada elemen pseudo-class `:root` dan `body.dark`. Tidak membutuhkan framework eksternal raksasa yang memberatkan, sehingga memberikan performa ekstra optimal saat berganti tema secara seketika (*instant toggle*).
+

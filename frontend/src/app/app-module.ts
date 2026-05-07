@@ -11,7 +11,12 @@ import { StudentForm } from './student-form/student-form';
 import { StudentProjects } from './student-projects/student-projects';
 import { Assignment } from './assignment/assignment';
 import { LoginComponent } from './login/login';
+import { RegisterComponent } from './register/register';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password';
+import { DashboardComponent } from './dashboard/dashboard';
 import { AuthInterceptor } from './auth.interceptor';
+import { ConfirmModalComponent } from './confirm-modal/confirm-modal';
+import { StudentSubmissionsComponent } from './student-submissions/student-submissions';
 
 @NgModule({
   declarations: [
@@ -22,7 +27,12 @@ import { AuthInterceptor } from './auth.interceptor';
     StudentForm, 
     StudentProjects, 
     Assignment,
-    LoginComponent
+    LoginComponent,
+    RegisterComponent,
+    ForgotPasswordComponent,
+    DashboardComponent,
+    ConfirmModalComponent,
+    StudentSubmissionsComponent
   ],
 
   imports: [

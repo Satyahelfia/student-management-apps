@@ -1,0 +1,558 @@
+<div class="dashboard">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-content">
+            <div class="welcome-text">
+                <h1>Welcome back! 👋</h1>
+                <p>Here's an overview of your student management system.</p>
+            </div>
+            <div class="welcome-decoration">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card stat-students">
+            <div class="stat-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Students</span>
+                <span class="stat-value">{{ totalStudents }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-projects">
+            <div class="stat-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Projects</span>
+                <span class="stat-value">{{ totalProjects }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-average">
+            <div class="stat-icon">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Average Score</span>
+                <span class="stat-value">{{ averageScore }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-config">
+            <div class="stat-icon">
+                <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Max Projects / Student</span>
+                <span class="stat-value">{{ maxProjects }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Quick Actions -->
+        <div class="dashboard-card quick-actions-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <a routerLink="/students/addstudent" class="action-item">
+                    <div class="action-icon action-add-student">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">Add Student</span>
+                        <span class="action-desc">Register a new student</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+                <a routerLink="/projects" class="action-item">
+                    <div class="action-icon action-projects">
+                        <i class="fa-solid fa-folder-plus"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">Manage Projects</span>
+                        <span class="action-desc">View and create projects</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+                <a routerLink="/assignment" class="action-item">
+                    <div class="action-icon action-assign">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">View Assignment</span>
+                        <span class="action-desc">Auto-assign projects to students</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+                <a routerLink="/students" class="action-item">
+                    <div class="action-icon action-list">
+                        <i class="fa-solid fa-list-ul"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">Student List</span>
+                        <span class="action-desc">Browse all students</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Top Students -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-trophy"></i> Top Students</h3>
+                <a routerLink="/students" class="card-link">View All</a>
+            </div>
+            <div class="card-body">
+                <div *ngIf="topStudents.length === 0" class="empty-state">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <p>No students yet</p>
+                </div>
+                <div class="top-student-list">
+                    <div *ngFor="let student of topStudents; let i = index" class="top-student-item">
+                        <div class="student-rank" [class]="'rank-' + (i + 1)">
+                            {{ i + 1 }}
+                        </div>
+                        <div class="student-info">
+                            <span class="student-name">{{ student.name }}</span>
+                            <span class="student-projects">{{ student.projects?.length || 0 }} projects</span>
+                        </div>
+                        <div class="student-score">
+                            {{ student.average }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Projects -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-folder-open"></i> Recent Projects</h3>
+                <a routerLink="/projects" class="card-link">View All</a>
+            </div>
+            <div class="card-body">
+                <div *ngIf="recentProjects.length === 0" class="empty-state">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <p>No projects yet</p>
+                </div>
+                <div class="project-list">
+                    <div *ngFor="let project of recentProjects" class="project-item">
+                        <div class="project-icon">
+                            <i class="fa-solid fa-cube"></i>
+                        </div>
+                        <div class="project-info">
+                            <span class="project-name">{{ project.name }}</span>
+                            <span class="project-id">ID: {{ project.id }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard {
+    max-width: 100%;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== WELCOME BANNER ===== */
+.welcome-banner {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+    border-radius: 1rem;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-text h1 {
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.025em;
+}
+
+.welcome-text p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.welcome-decoration {
+    font-size: 3.5rem;
+    color: rgba(255,255,255,0.15);
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.875rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    transition: all 0.25s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.stat-students .stat-icon {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #6366f1;
+}
+
+.stat-projects .stat-icon {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    color: #059669;
+}
+
+.stat-average .stat-icon {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    color: #d97706;
+}
+
+.stat-config .stat-icon {
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    color: #db2777;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.stat-value {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+/* ===== CONTENT GRID ===== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+}
+
+/* ===== DASHBOARD CARD ===== */
+.dashboard-card {
+    background: white;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.125rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.card-header h3 i {
+    color: #6366f1;
+    font-size: 0.85rem;
+}
+
+.card-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6366f1;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.card-link:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+}
+
+.card-body {
+    padding: 1rem 1.5rem;
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-actions-card .card-body {
+    padding: 0.5rem 0.75rem;
+}
+
+.action-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 0.75rem;
+    border-radius: 0.625rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-item:hover {
+    background: #f8fafc;
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.action-add-student { background: #eef2ff; color: #6366f1; }
+.action-projects { background: #ecfdf5; color: #059669; }
+.action-assign { background: #fffbeb; color: #d97706; }
+.action-list { background: #f0f9ff; color: #0284c7; }
+
+.action-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.action-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.action-desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.action-arrow {
+    color: #cbd5e1;
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+}
+
+.action-item:hover .action-arrow {
+    transform: translateX(3px);
+    color: #6366f1;
+}
+
+/* ===== TOP STUDENTS ===== */
+.top-student-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.top-student-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.top-student-item:last-child {
+    border-bottom: none;
+}
+
+.student-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+.rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+.rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+
+.student-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.student-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.student-projects {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+.student-score {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #6366f1;
+}
+
+/* ===== PROJECT LIST ===== */
+.project-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    background: #ecfdf5;
+    color: #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.project-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.project-id {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #94a3b8;
+}
+
+.empty-state i {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .welcome-banner {
+        padding: 1.5rem;
+    }
+    .welcome-text h1 {
+        font-size: 1.25rem;
+    }
+    .welcome-decoration {
+        display: none;
+    }
+}
+</style>

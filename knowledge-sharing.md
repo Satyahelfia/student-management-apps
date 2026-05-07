@@ -42,11 +42,12 @@ Spring Boot adalah framework Java yang mempermudah pembuatan aplikasi server (ba
 backend/src/main/java/com/satya/assignment/
 ├── model/          → "Bentuk data" (seperti cetakan kue)
 ├── repository/     → "Penghubung ke database" (otomatis bikin query SQL)
-├── controller/     → "Pintu masuk request" (terima HTTP, kirim response)
+├── service/        → "Otak aplikasi" (logika bisnis, validasi, & transaksi)
+├── controller/     → "Pintu masuk request" (hanya terima HTTP, kirim response)
 ├── security/       → "Satpam" (cek token, izinkan/tolak akses)
-├── config/         → "Setup awal" (bikin user admin pertama kali)
-└── dto/            → "Amplop surat" (format data request/response)
+└── config/         → "Setup awal" (bikin user admin pertama kali)
 ```
+
 
 ---
 
@@ -106,34 +107,33 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
 
 ---
 
-### 1.3 Controller — Pintu Masuk Request
+### 1.3 Controller — Pintu Masuk Request (Thin Controller)
 
 File: `StudentController.java`
 
 ```java
-@RestController             // ← "Class ini menerima HTTP request"
-@RequestMapping("/students")   // ← "Semua URL dimulai dari /students"
+@RestController               // ← "Class ini hanya menerima HTTP request"
+@RequestMapping("/students")  // ← "Semua URL dimulai dari /students"
 public class StudentController {
 
+    @Autowired
+    private StudentService studentService; // ← Meng-inject Service, bukan Repository!
+
     @GetMapping("/")            // GET /students/
-    public List<Student> getAllStudents() {
-        return studentRepo.findAll();   // Ambil semua dari database
+    public ResponseEntity<List<Student>> getAllStudent() {
+        return ResponseEntity.ok(studentService.getAllStudents()); // Delegasikan ke servis
     }
 
     @PostMapping("/")           // POST /students/
-    public Student addStudent(@RequestBody Student student) {
-        return studentRepo.save(student);  // Simpan ke database
-    }
-
-    @PutMapping("/{id}")        // PUT /students/1
-    public Student updateStudent(@PathVariable int id, @RequestBody Student student) {
-        student.setId(id);
-        return studentRepo.save(student);  // Update di database
+    public ResponseEntity<Student> createStudent(@RequestBody Student studentDetails) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(studentService.createStudent(studentDetails));
     }
 
     @DeleteMapping("/{id}")     // DELETE /students/1
-    public void deleteStudent(@PathVariable int id) {
-        studentRepo.deleteById(id);
+    public ResponseEntity<String> deleteStudent(@PathVariable int id) {
+        studentService.deleteStudent(id);
+        return ResponseEntity.ok("Student deleted Successfully");
     }
 }
 ```
@@ -146,9 +146,10 @@ public class StudentController {
 | `@RequestBody` | "Ambil data JSON dari body request, ubah jadi objek Java" |
 | `@PathVariable` | "Ambil angka dari URL" (misal: `/students/1` → `id = 1`) |
 
-**Analogi:** Controller seperti **resepsionis hotel** — terima permintaan tamu, lalu koordinasi dengan bagian terkait (repository) untuk memenuhi permintaan.
+**Analogi:** Controller seperti **resepsionis restoran (pelayan)** — murni mencatat pesanan tamu dan mengantarkan makanan yang sudah siap (HTTP Input/Output). Ia tidak boleh ikut memasak. Tugas memasak, memilah bahan, dan logika resep dikoordinasikan langsung oleh **Dapur (Service Layer)**.
 
 ---
+
 
 ### 1.4 Security — Sistem Keamanan
 
@@ -388,9 +389,9 @@ const routes: Routes = [
 
 ---
 
-### 2.5 Zoneless Change Detection (Angular 21)
+### 2.5 Zoneless Change Detection & RxJS `forkJoin` (Angular 21)
 
-Di Angular versi lama, setiap kali ada event (klik, HTTP response, timer), Angular **otomatis** mengecek semua komponen dan update tampilan. Ini dilakukan oleh library bernama `zone.js`.
+Di Angular versi lama, setiap kali ada event (klik, HTTP response, timer), Angular **otomatis** mengecek seluruh komponen dan meng-update tampilan. Ini dilakukan oleh library bernama `zone.js`.
 
 Di **Angular 21**, `zone.js` dihapus (*zoneless*). Artinya Angular **tidak lagi otomatis** mendeteksi perubahan data. Kamu harus memberitahu Angular secara manual:
 
@@ -400,36 +401,184 @@ this.students = data
 this.cdr.detectChanges()   // ← "Hey Angular, data sudah berubah, tolong render ulang!"
 ```
 
-Tanpa `detectChanges()`, data sudah masuk ke variabel, tapi **tampilan tetap kosong** — itulah bug yang kita perbaiki sebelumnya.
+#### Optimasi Menggunakan `forkJoin`:
+Jika sebuah halaman memanggil 3 API sekaligus secara terpisah, kita akan memanggil `cdr.detectChanges()` sebanyak 3 kali. Ini tidak efisien karena browser dipaksa merender ulang 3 kali berturut-turut.
 
----
-
-## 🔄 BAGIAN 3: ALUR LENGKAP (End-to-End)
-
-### Contoh: User membuka halaman Student List
-
-```mermaid
-flowchart TD
-    A["User buka /students"] --> B["AuthGuard: ada token di localStorage?"]
-    B -->|Tidak| C["Redirect ke /login"]
-    B -->|Ya| D["Render StudentList component"]
-    D --> E["ngOnInit() dipanggil"]
-    E --> F["studentApi.getAllStudent() dipanggil"]
-    F --> G["AuthInterceptor: tambah header Authorization: Bearer xxx"]
-    G --> H["HTTP GET http://127.0.0.1:9090/students/"]
-    H --> I["JwtAuthenticationFilter: validasi token"]
-    I -->|Invalid| J["403 Forbidden"]
-    I -->|Valid| K["StudentController.getAllStudents()"]
-    K --> L["StudentRepository.findAll()"]
-    L --> M["MySQL: SELECT * FROM student"]
-    M --> N["Return data JSON ke Angular"]
-    N --> O["this.students = data"]
-    O --> P["cdr.detectChanges()"]
-    P --> Q["Angular render tabel dengan *ngFor"]
-    Q --> R["User melihat daftar student di browser"]
+Kita mengoptimalkannya dengan RxJS `forkJoin` untuk menggabungkan request tersebut:
+```typescript
+forkJoin({
+  students: this.studentApi.getAllStudent(),
+  projects: this.projectApi.getAllProject(),
+  maxProjects: this.studentApi.getMaxProjectsPerStudent()
+}).subscribe({
+  next: ({ students, projects, maxProjects }) => {
+    this.students = students;
+    this.projects = projects;
+    this.maxProjects = maxProjects;
+    this.cdr.detectChanges(); // Hanya memicu render ulang 1 KALI saja!
+  }
+});
 ```
 
 ---
+
+### 2.6 Penyelesaian Bug: Ketergantungan Melingkar (Circular Dependency)
+Saat aplikasi pertama kali dinyalakan:
+1. `AuthInterceptor` membutuhkan `AuthService` untuk membaca token.
+2. `AuthService` membutuhkan `HttpClient` untuk mengecek status login.
+3. `HttpClient` membutuhkan `AuthInterceptor` untuk menyisipkan header token.
+
+Hubungan melingkar ini menyebabkan interceptor gagal dimuat pada *request* pertama (`/auth/me`), sehingga token tidak disematkan dan user langsung dikeluarkan otomatis (*logout*).
+
+**Solusinya:**
+Kita mengubah `AuthInterceptor` agar mengambil token langsung dari tempat penyimpanan lokal tanpa melibatkan service:
+```typescript
+// Solusi efisien tanpa meng-inject AuthService
+const token = localStorage.getItem('jwt_token');
+```
+Hal ini memutuskan rantai ketergantungan melingkar sepenuhnya!
+
+---
+
+## 🟢 BAGIAN 3: OPTIMASI ENTERPRISE (Database & Keamanan)
+
+### 3.1 Solusi N+1 Query (Spring Data JPA)
+Secara bawaan, jika entitas `Student` berelasi `@ManyToMany(fetch = FetchType.EAGER)` dengan `Project`, Hibernate akan melakukan kueri pembuka:
+1. Ambil daftar siswa (`SELECT * FROM student`).
+2. Untuk **setiap** siswa yang ditemukan (misal ada N siswa), Hibernate akan melakukan kueri tambahan untuk mengambil daftar proyeknya.
+Hal ini memicu **N + 1 kueri** ke database yang sangat memperlambat server!
+
+**Solusi yang kami terapkan:**
+Menggunakan JPQL **Join Fetch** di `StudentRepository.java`:
+```java
+@Query("SELECT DISTINCT s FROM Student s LEFT JOIN FETCH s.projects")
+List<Student> findAllWithProjects();
+```
+*Hasil:* Database MySQL hanya melakukan **1 kali kueri tunggal** yang menggabungkan (*join*) tabel siswa dan proyek, menghasilkan efisiensi pembacaan hingga 90% lebih cepat!
+
+### 3.2 Stateless Zero-Database-Lookup JWT
+Biasanya, setiap kali ada request API masuk, filter keamanan Spring Security akan memanggil database (`userDetailsService.loadUserByUsername(username)`) untuk memeriksa peran (*role*) pengguna. Ini menyebabkan database terus-menerus terbebani kueri pencarian user yang sama berulang kali.
+
+**Solusi yang kami terapkan:**
+1. Saat login berhasil, simpan peran (`role`) pengguna di dalam claims payload JWT:
+   ```java
+   claims.put("role", role);
+   ```
+2. Pada setiap request masuk, satpam `JwtAuthenticationFilter` membaca peran langsung dari claims JWT tersebut tanpa menyentuh database sama sekali:
+   ```java
+   String role = jwtService.extractClaim(token, claims -> claims.get("role", String.class));
+   UserDetails userDetails = User.withUsername(username).password("").roles(role).build();
+   ```
+*Hasil:* Keamanan terjamin secara penuh dan beban kueri database untuk otentikasi berkurang menjadi **0 kueri**!
+
+---
+
+## 🔄 BAGIAN 4: ALUR LENGKAP PENGUMPULAN & PENILAIAN
+
+Aplikasi ini sekarang mendukung alur pembelajaran lengkap antara Siswa dan Admin:
+
+```mermaid
+sequenceDiagram
+    participant S as Siswa (STUDENT)
+    participant B as Backend API
+    participant A as Admin (ADMIN)
+
+    S->>B: Kirim tugas (POST /students/{id}/projects/{id}/submit)
+    Note over S,B: Menyertakan URL repositori & catatan teks
+    B->>B: Ubah status menjadi "SUBMITTED"
+    A->>B: Lihat daftar tugas (GET /students/{id}/projectdetails)
+    A->>B: Berikan nilai & feedback (POST /students/{id}/projects/{id}/grade)
+    B->>B: Hitung ulang nilai rata-rata (Average Score) siswa otomatis!
+    B->>B: Ubah status menjadi "GRADED"
+    S->>B: Buka halaman "My Submissions"
+    B->>S: Tampilkan nilai & feedback dari Admin!
+```
+
+---
+
+## 📁 BAGIAN 5: FITUR ATTACHMENT PROYEK (PDF & GAMBAR)
+
+Sistem kini mendukung penambahan lampiran dokumen berupa **PDF** dan **Gambar** setiap kali administrator membuat proyek baru.
+
+### 5.1 Penyimpanan Database (Database Storage)
+Untuk memudahkan distribusi tanpa memerlukan server file eksternal (seperti AWS S3), file disimpan langsung di tabel database MySQL dalam format biner:
+*   `@Lob` & `@Column(columnDefinition = "LONGBLOB")`: Memungkinkan penyimpanan file dengan ukuran besar (hingga 4GB) langsung di database MySQL.
+*   `pdf_name` & `pdf_type`: Menyimpan nama file asli dan MIME-type (misalnya `application/pdf`) agar browser dapat merender file secara alami.
+*   `image_name` & `image_type`: Menyimpan nama gambar asli dan MIME-type-nya (misalnya `image/png` atau `image/jpeg`).
+
+### 5.2 Alur Pemrosesan Multi-Part di Backend (Spring Boot)
+1.  **Request Multi-part:** Menggunakan `@PostMapping(value = "/", consumes = {"multipart/form-data"})` untuk memisahkan pengolahan input teks biasa dan file biner `MultipartFile`.
+2.  **Streaming Unduhan Terproteksi:** Dibuat endpoint unduhan khusus yang mengembalikan array biner (`byte[]`) beserta header HTTP yang tepat:
+    ```java
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> getProjectPdf(@PathVariable int id) {
+        Project project = projectService.getProjectById(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, project.getPdfType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + project.getPdfName() + "\"")
+                .body(project.getPdfData());
+    }
+    ```
+    *Catatan:* Penggunaan header `CONTENT_DISPOSITION = "inline"` membuat browser membuka PDF/Gambar langsung di tab baru secara interaktif, bukan langsung mengunduhnya sebagai file tak terbaca.
+
+### 5.3 Pengiriman Menggunakan FormData di Frontend (Angular)
+Karena JSON biasa tidak mendukung transfer file biner mentah secara efisien, kita menggunakan objek bawaan HTML5 yaitu **`FormData`**:
+```typescript
+addProject(name: string, pdfFile?: File | null, imageFile?: File | null): Observable<Project> {
+  const formData = new FormData();
+  formData.append('name', name);
+  if (pdfFile) {
+    formData.append('pdf', pdfFile);
+  }
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  return this.httpClient.post<Project>(this.link, formData);
+}
+```
+
+---
+
+## 🎨 BAGIAN 6: ADVANCED UI/UX (THEMING, SORTING & PAGINATION)
+
+Aplikasi ini menggunakan teknik antarmuka (*UI*) modern untuk memberikan pengalaman seperti aplikasi desktop.
+
+### 6.1 Native CSS Variable Theming (Dark Mode & Light Mode)
+Ketimbang menggunakan kerangka kerja (*framework*) yang berat, tema aplikasi diatur secara murni menggunakan **Variabel CSS Global** (CSS Custom Properties). 
+
+1. **Deklarasi Variabel:** Di `styles.css`, warna-warna utama disimpan dalam root:
+   ```css
+   :root {
+     --bg-app: #f8fafc;
+     --bg-card: #ffffff;
+     --text-primary: #0f172a;
+   }
+   ```
+2. **Definisi Varian Gelap:** Kemudian dioverride ketika class `.dark` diaktifkan:
+   ```css
+   body.dark {
+     --bg-app: #0f172a;
+     --bg-card: #1e293b;
+     --text-primary: #f8fafc;
+   }
+   ```
+3. **Penyimpanan (*Persistence*):** Saat tombol pergantian tema ditekan, preferensi disimpan di dalam `localStorage`. Ketika aplikasi direload, state dibaca kembali di dalam `App` komponen (pada `ngOnInit()`), menjadikan tema *persisten*.
+
+### 6.2 Client-Side Pagination & Interactive Sorting
+Ketika data sangat besar (contoh: daftar siswa, hasil assignment), memuat dan menampilkannya sekaligus akan memberatkan DOM browser. Kita mengelola state data **secara langsung di frontend** agar *feel*-nya instan (0 latensi jaringan).
+
+* **Sorting:** Menggunakan fitur iterasi bawaan Javascript `Array.prototype.sort()` bersama fungsi utilitas perbandingan (`localeCompare` untuk teks, aritmatika untuk angka). Karena `ChangeDetectorRef.detectChanges()` dipanggil tepat sesudahnya, tampilan berubah secepat kilat.
+* **Pagination:** Menggunakan *getters* dinamis untuk memotong (`Array.prototype.slice()`) data utama. 
+  ```typescript
+  get paginatedStudents(): Student[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredStudents.slice(start, start + this.pageSize);
+  }
+  ```
+  Setiap *event* seperti berpindah halaman, merubah urutan sortir, atau sekadar melakukan pencarian, secara proaktif mereset `currentPage = 1` agar UX terasa mulus.
+
+---
+
 
 ## 📌 Cheat Sheet: Anotasi Penting
 
@@ -440,6 +589,7 @@ flowchart TD
 | `@Id` | Field ini = primary key |
 | `@Column` | Field ini = kolom di tabel |
 | `@ManyToMany` | Relasi banyak-ke-banyak |
+| `@Query` | Menuliskan kueri JPQL manual (untuk optimasi JOIN FETCH) |
 | `@RestController` | Class ini menerima HTTP request |
 | `@GetMapping` | Handle request GET |
 | `@PostMapping` | Handle request POST |
@@ -447,7 +597,6 @@ flowchart TD
 | `@PathVariable` | Ambil nilai dari URL path |
 | `@Autowired` | Inject dependency otomatis |
 | `@Service` | Class ini adalah business logic |
-| `@Configuration` | Class ini berisi konfigurasi |
 
 ### Angular
 | Konsep | Artinya |
@@ -457,6 +606,8 @@ flowchart TD
 | `*ngFor` | Loop di template (ulangi HTML untuk setiap item) |
 | `*ngIf` | Kondisi di template (tampilkan jika true) |
 | `[(ngModel)]` | Two-way binding (input form ↔ variabel) |
-| `[routerLink]` | Link navigasi tanpa reload halaman |
+| `[routerLink]` | Link navigasi tanpa reload halaman (menjaga state SPA) |
 | `.subscribe()` | Berlangganan data dari Observable (HTTP) |
+| `forkJoin` | Menjalankan beberapa HTTP request secara pararel |
 | `ChangeDetectorRef` | Paksa Angular render ulang (wajib di Angular 21) |
+

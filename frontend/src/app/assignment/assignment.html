@@ -1,26 +1,287 @@
-<div class="sm:flex sm:items-center mb-6">
-    <div class="sm:flex-auto">
-        <h2 class="!mb-0">Assignment Results</h2>
-        <p class="mt-2 text-sm text-slate-700">Overview of students and their assigned projects.</p>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <button class="btn-back" (click)="goBack()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1>Assignment Results</h1>
+                <p>Overview of students and their auto-assigned projects.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Table -->
+    <div class="card table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th (click)="setSort('name')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>Student</span>
+                            <i class="fa-solid" [ngClass]="sortBy === 'name' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'" style="color: #6366f1; font-size: 0.85rem;"></i>
+                        </div>
+                    </th>
+                    <th (click)="setSort('projectCount')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>Assigned Projects</span>
+                            <i class="fa-solid" [ngClass]="sortBy === 'projectCount' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'" style="color: #6366f1; font-size: 0.85rem;"></i>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of paginatedAssignment" [style.background]="item.projects.length === 0 ? '#fafafb' : 'transparent'">
+                    <td class="td-name">
+                        <div class="name-cell">
+                            <div class="avatar" [ngClass]="item.projects.length === 0 ? 'avatar-empty' : 'avatar-student'">
+                                {{ getInitial(item.studentName) }}
+                            </div>
+                            <span [style.color]="item.projects.length === 0 ? '#64748b' : '#0f172a'"
+                                  [style.font-weight]="item.projects.length === 0 ? '500' : '600'">
+                                {{item.studentName}}
+                            </span>
+                            <span *ngIf="item.projects.length === 0" style="font-size: 0.7rem; background: #fee2e2; color: #ef4444; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-weight: 600; margin-left: 0.5rem; display: inline-flex; align-items: center; gap: 0.2rem; border: 1px solid #fecaca;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Unassigned
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <!-- Loop over all projects if any exist -->
+                        <div *ngIf="item.projects.length > 0" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <div *ngFor="let projName of item.projects" class="project-badge">
+                                <i class="fa-solid fa-cube"></i>
+                                <span>{{projName}}</span>
+                            </div>
+                        </div>
+                        <!-- If no projects are assigned -->
+                        <div *ngIf="item.projects.length === 0" class="project-badge-empty">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>No Active Projects</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="assignmentList.length === 0">
+                    <td colspan="2" class="empty-row">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <p>No assignments found</p>
+                            <span class="empty-hint">Make sure students and projects exist in the system.</span>
+                        </div>
+                    </td>
+                </tr>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination-bar" *ngIf="totalPages > 1">
+            <div class="pagination-info">
+                Showing <strong>{{ showingFrom }}</strong> – <strong>{{ showingTo }}</strong> of <strong>{{ assignmentList.length }}</strong>
+            </div>
+            <div class="pagination-controls">
+                <button class="page-btn page-arrow" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button *ngFor="let p of pageNumbers"
+                    class="page-btn"
+                    [class.page-active]="p === currentPage"
+                    (click)="goToPage(p)">
+                    {{ p }}
+                </button>
+                <button class="page-btn page-arrow" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden bg-white">
-    <table>
-        <thead>
-            <tr> 
-                <th>Student</th>
-                <th>Project</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let item of assignmentResult | keyvalue">
-                <td class="font-medium text-slate-900">{{item.key}}</td>
-                <td>{{item.value}}</td>
-            </tr>
-            <tr *ngIf="(assignmentResult | keyvalue)?.length === 0">
-                <td colspan="2" class="text-center text-slate-500 py-8">No assignments found.</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<style>
+.page-container { animation: fadeIn 0.35s ease; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-header-left h1 {
+    font-size: 1.5rem; font-weight: 700; color: #0f172a;
+    margin: 0; letter-spacing: -0.025em;
+}
+
+.page-header-left p {
+    font-size: 0.85rem; color: #64748b; margin: 0.15rem 0 0;
+}
+
+.btn-back {
+    width: 38px; height: 38px;
+    border-radius: 0.625rem;
+    background: white !important;
+    border: 1.5px solid #e2e8f0;
+    color: #64748b;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+    flex-shrink: 0; font-size: 0.85rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    padding: 0;
+}
+
+.btn-back:hover {
+    background: #f8fafc !important;
+    border-color: #6366f1; color: #6366f1;
+}
+
+.card {
+    background: white;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.table-card table { border-radius: 0; box-shadow: none; }
+
+.td-name { font-weight: 600; color: #0f172a; }
+
+.name-cell {
+    display: flex; align-items: center; gap: 0.75rem;
+}
+
+.avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+}
+
+.avatar-student {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    color: #d97706;
+}
+
+.avatar-empty {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    color: #64748b;
+    border: 1.5px solid #e2e8f0;
+}
+
+.project-badge-empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.75rem;
+    background: #fef2f2;
+    color: #dc2626;
+    border-radius: 0.5rem;
+    font-size: 0.825rem;
+    font-weight: 500;
+    border: 1px solid #fee2e2;
+}
+
+
+.project-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.75rem;
+    background: #f0fdf4;
+    color: #15803d;
+    border-radius: 0.5rem;
+    font-size: 0.825rem;
+    font-weight: 500;
+    border: 1px solid #bbf7d0;
+}
+
+.project-badge i { font-size: 0.7rem; opacity: 0.7; }
+
+.empty-row { text-align: center; padding: 3rem 1rem !important; }
+.empty-state { color: #94a3b8; }
+.empty-state i { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+.empty-state p { margin: 0; font-size: 0.9rem; font-weight: 500; }
+.empty-hint { font-size: 0.78rem; color: #cbd5e1; display: block; margin-top: 0.25rem; }
+
+@media (max-width: 640px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ===== PAGINATION ===== */
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.pagination-info strong {
+    color: #0f172a;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.page-btn {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid #e2e8f0;
+    background: white !important;
+    color: #475569;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0;
+    box-shadow: none !important;
+}
+
+.page-btn:hover:not(:disabled):not(.page-active) {
+    background: #f8fafc !important;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.page-active {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-arrow {
+    font-size: 0.7rem;
+}
+</style>

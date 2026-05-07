@@ -1,4 +1,4 @@
-package com.satya.assignment.model;
+package com.satya.assignment.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +14,7 @@ public class AppUser {
     private String username;
     private String password;
     private String role;
+    private Integer studentId;
 
     public AppUser() {}
 
@@ -21,6 +22,13 @@ public class AppUser {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public AppUser(String username, String password, String role, Integer studentId) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.studentId = studentId;
     }
 
     public Long getId() {
@@ -53,5 +61,13 @@ public class AppUser {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Integer getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Integer studentId) {
+        this.studentId = studentId;
     }
 }

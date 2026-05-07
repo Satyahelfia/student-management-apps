@@ -1,6 +1,10 @@
-<div class="min-h-screen bg-slate-50">
+<div class="min-h-screen" style="background-color: var(--bg-app); transition: background-color 0.2s ease;" *ngIf="!isAuthPage">
   <app-header></app-header>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <router-outlet></router-outlet>
   </main>
+</div>
+
+<div *ngIf="isAuthPage">
+  <router-outlet></router-outlet>
 </div>

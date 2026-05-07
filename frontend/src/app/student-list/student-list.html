@@ -1,63 +1,580 @@
-<div class="sm:flex sm:items-center mb-6">
-    <div class="sm:flex-auto">
-        <h2 class="!mb-0">Student List</h2>
-        <p class="mt-2 text-sm text-slate-700">A list of all students including their ID, name, average score, and actions.</p>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <button class="btn-back" (click)="goBack()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1>Student List</h1>
+                <p>A list of all students including their ID, name, average score, and actions.</p>
+            </div>
+        </div>
+        <div class="page-header-right">
+            <a [routerLink]="['/students/addstudent']" class="btn-primary">
+                <i class="fa-solid fa-user-plus"></i>
+                Add Student
+            </a>
+        </div>
     </div>
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-        <a [routerLink]="['/students/addstudent']" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            <i class="fa fa-user-plus mr-1"></i> Add Student
-        </a>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+                type="text"
+                placeholder="Search by name, ID, or average..."
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange()"
+                class="search-input"
+                id="student-search">
+            <button *ngIf="searchQuery" class="search-clear" (click)="searchQuery = ''; onSearchChange()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="search-meta">
+            <span>{{ filteredStudents.length }} of {{ students.length }} students</span>
+        </div>
+    </div>
+
+    <!-- Student Table -->
+    <div class="card table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th (click)="toggleSort('id')" class="sortable-th" title="Sort by Id">
+                        <div class="th-content">
+                            Id
+                            <i class="fa-solid"
+                               [class.fa-sort-up]="sortBy === 'id' && sortDirection === 'asc'"
+                               [class.fa-sort-down]="sortBy === 'id' && sortDirection === 'desc'"
+                               [class.fa-sort]="sortBy !== 'id'"></i>
+                        </div>
+                    </th>
+                    <th (click)="toggleSort('name')" class="sortable-th" title="Sort by Name">
+                        <div class="th-content">
+                            Name
+                            <i class="fa-solid"
+                               [class.fa-sort-up]="sortBy === 'name' && sortDirection === 'asc'"
+                               [class.fa-sort-down]="sortBy === 'name' && sortDirection === 'desc'"
+                               [class.fa-sort]="sortBy !== 'name'"></i>
+                        </div>
+                    </th>
+                    <th (click)="toggleSort('average')" class="sortable-th" title="Sort by Average Score">
+                        <div class="th-content">
+                            Average
+                            <i class="fa-solid"
+                               [class.fa-sort-up]="sortBy === 'average' && sortDirection === 'asc'"
+                               [class.fa-sort-down]="sortBy === 'average' && sortDirection === 'desc'"
+                               [class.fa-sort]="sortBy !== 'average'"></i>
+                        </div>
+                    </th>
+                    <th class="th-action">Edit</th>
+                    <th class="th-action">Projects</th>
+                    <th class="th-action">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let student of paginatedStudents">
+                    <td class="td-id">{{student.id}}</td>
+                    <td class="td-name">
+                        <div class="name-cell">
+                            <div class="avatar">{{ getInitial(student.name) }}</div>
+                            <span>{{student.name}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-score">{{student.average}}</span>
+                    </td>
+                    <td class="td-action">
+                        <a [routerLink]="['/students/updatestudent', student.id]" class="action-btn action-edit" title="Edit">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </td>
+                    <td class="td-action">
+                        <a [routerLink]="['/students', student.id, 'projects']" class="action-btn action-project" title="Projects">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </a>
+                    </td>
+                    <td class="td-action">
+                        <button class="action-btn action-delete" (click)="confirmDelete(student)" title="Delete">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredStudents.length === 0">
+                    <td colspan="6" class="empty-row">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-users-slash"></i>
+                            <p *ngIf="searchQuery">No students match "{{ searchQuery }}"</p>
+                            <p *ngIf="!searchQuery">No students found</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination-bar" *ngIf="totalPages > 1">
+            <div class="pagination-info">
+                Showing <strong>{{ showingFrom }}</strong> – <strong>{{ showingTo }}</strong> of <strong>{{ filteredStudents.length }}</strong>
+            </div>
+            <div class="pagination-controls">
+                <button class="page-btn page-arrow" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button *ngFor="let p of pageNumbers"
+                    class="page-btn"
+                    [class.page-active]="p === currentPage"
+                    (click)="goToPage(p)">
+                    {{ p }}
+                </button>
+                <button class="page-btn page-arrow" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card settings-card">
+        <div class="settings-header">
+            <i class="fa-solid fa-gear"></i>
+            <h3>Settings</h3>
+        </div>
+        <form (ngSubmit)="confirmSaveSettings()" class="settings-form">
+            <div class="settings-input-group">
+                <label for="maxProjectPerStudent">
+                    Max Projects Per Student
+                </label>
+                <div class="settings-current">Current: <strong>{{maxProjectsPerStudent}}</strong></div>
+            </div>
+            <div class="settings-action">
+                <input type="number" min="2" step="1" name="maxProjectsPerStudent" id="maxProjectPerStudent" [(ngModel)]="tempNumber" placeholder="Enter new max">
+                <button type="submit" class="btn-primary btn-sm">
+                    <i class="fa-solid fa-check"></i> Save
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="shadow-sm ring-1 ring-slate-200 rounded-lg overflow-hidden bg-white mb-8">
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Average</th>
-                <th class="relative px-6 py-3"><span class="sr-only">Edit</span></th>
-                <th class="relative px-6 py-3"><span class="sr-only">Projects</span></th>
-                <th class="relative px-6 py-3"><span class="sr-only">Delete</span></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let student of students">
-                <td>{{student.id}}</td>
-                <td class="font-medium text-slate-900">{{student.name}}</td>
-                <td>{{student.average}}</td>
-                <td class="text-right text-sm font-medium">
-                    <a [routerLink]="['/students/updatestudent', student.id]" class="interactivehover">
-                        <i class="fa fa-pencil"></i>
-                    </a>
-                </td>
-                <td class="text-right text-sm font-medium">
-                    <a [routerLink]="['/students', student.id, 'projects']" class="interactivehover text-indigo-600 hover:text-indigo-900">
-                        <i class="fa fa-tasks"></i>
-                    </a>
-                </td>
-                <td class="text-right text-sm font-medium">
-                    <button class="interactivehover text-red-600 hover:text-red-900 bg-transparent border-0 p-0 shadow-none focus-visible:outline-none" (click)="deleteStudent(student.id)">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<!-- Delete Confirmation Modal -->
+<app-confirm-modal
+    [show]="showDeleteModal"
+    type="delete"
+    title="Delete Student"
+    [message]="'Are you sure you want to delete ' + (selectedStudent?.name || '') + '? This action cannot be undone.'"
+    confirmText="Delete"
+    (confirmed)="onDeleteConfirmed()"
+    (cancelled)="showDeleteModal = false">
+</app-confirm-modal>
 
-<div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-lg p-6 max-w-lg">
-    <h3 class="text-lg font-medium leading-6 text-slate-900 mb-4">Settings</h3>
-    <form (ngSubmit)="updateMaxProjectsPerStudent()" class="flex items-end gap-4">
-        <div class="flex-grow">
-            <label for="maxProjectPerStudent">
-                Max Projects Per Student (Current: {{maxProjectsPerStudent}})
-            </label>
-            <input type="number" min="2" step="1" name="maxProjectsPerStudent" id="maxProjectPerStudent" [(ngModel)]="tempNumber" class="mt-1">
-        </div>
-        <div class="flex-shrink-0">
-            <button type="submit">Save</button>
-        </div>
-    </form>
-</div>
+<!-- Save Settings Modal -->
+<app-confirm-modal
+    [show]="showSaveModal"
+    type="save"
+    title="Save Settings"
+    message="Are you sure you want to update the max projects per student setting?"
+    confirmText="Save Changes"
+    (confirmed)="onSaveConfirmed()"
+    (cancelled)="showSaveModal = false">
+</app-confirm-modal>
+
+<style>
+.page-container { animation: fadeIn 0.35s ease; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.page-header-left p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0.15rem 0 0;
+}
+
+.btn-back {
+    width: 38px;
+    height: 38px;
+    border-radius: 0.625rem;
+    background: white !important;
+    border: 1.5px solid #e2e8f0;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    padding: 0;
+}
+
+.btn-back:hover {
+    background: #f8fafc !important;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.15rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 0.625rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+}
+
+.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 2.2rem 0.6rem 2.4rem !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 0.625rem !important;
+    font-size: 0.85rem !important;
+    background: white !important;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+    margin: 0 !important;
+}
+
+.search-input:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    outline: none !important;
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+.search-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #f1f5f9 !important;
+    color: #64748b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.65rem;
+    transition: all 0.15s;
+    padding: 0;
+    box-shadow: none !important;
+}
+
+.search-clear:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a;
+}
+
+.search-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+/* ===== CARD ===== */
+.card {
+    background: white;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+/* ===== TABLE ===== */
+.table-card table { border-radius: 0; box-shadow: none; }
+
+.th-action { text-align: center; width: 60px; }
+.td-action { text-align: center; }
+.td-id { color: #94a3b8; font-size: 0.8rem; font-weight: 500; }
+
+.td-name { font-weight: 600; color: #0f172a; }
+
+.name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.badge-score {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    background: #f0fdf4;
+    color: #15803d;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #bbf7d0;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.action-edit { color: #6366f1; }
+.action-edit:hover { background: #eef2ff; }
+.action-project { color: #0891b2; }
+.action-project:hover { background: #ecfeff; }
+.action-delete { color: #dc2626; }
+.action-delete:hover { background: #fef2f2; }
+
+.empty-row { text-align: center; padding: 2.5rem 1rem !important; }
+.empty-state { color: #94a3b8; }
+.empty-state i { font-size: 1.75rem; margin-bottom: 0.5rem; display: block; }
+.empty-state p { margin: 0; font-size: 0.85rem; }
+
+/* ===== PAGINATION ===== */
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.pagination-info strong {
+    color: #0f172a;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.page-btn {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid #e2e8f0;
+    background: white !important;
+    color: #475569;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0;
+    box-shadow: none !important;
+}
+
+.page-btn:hover:not(:disabled):not(.page-active) {
+    background: #f8fafc !important;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.page-active {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-arrow {
+    font-size: 0.7rem;
+}
+
+/* ===== SETTINGS ===== */
+.settings-card { padding: 1.5rem; max-width: 480px; }
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.settings-header i { color: #6366f1; font-size: 0.9rem; }
+.settings-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+}
+
+.settings-input-group { margin-bottom: 0.75rem; }
+.settings-input-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2rem;
+}
+.settings-current {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.settings-action {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.settings-action input { flex: 1; }
+
+@media (max-width: 640px) {
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .settings-card { max-width: 100%; }
+    .search-input-wrapper { max-width: 100%; }
+    .search-bar { flex-direction: column; align-items: stretch; }
+    .pagination-bar { flex-direction: column; align-items: center; }
+}
+
+/* ===== SORTABLE HEADER STYLES ===== */
+.sortable-th {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s;
+    position: relative;
+}
+
+.sortable-th:hover {
+    background-color: #f1f5f9 !important;
+    color: #4f46e5 !important;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.th-content i {
+    font-size: 0.75rem;
+    opacity: 0.35;
+    transition: opacity 0.2s, transform 0.2s, color 0.2s;
+    margin-left: 0.15rem;
+}
+
+.sortable-th:hover .th-content i {
+    opacity: 0.75;
+}
+
+.sortable-th .th-content i.fa-sort-up,
+.sortable-th .th-content i.fa-sort-down {
+    opacity: 1 !important;
+    color: #4f46e5 !important;
+}
+</style>

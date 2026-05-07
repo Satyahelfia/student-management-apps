@@ -2,7 +2,7 @@
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-16">
       <div class="flex">
-        <a href="/" class="flex-shrink-0 flex items-center">
+        <a routerLink="/dashboard" class="flex-shrink-0 flex items-center">
           <img src="/myr.png" class="h-10 w-10 object-contain" alt="Logo" />
           <span class="ml-3 text-sm font-medium text-slate-500">Satya Helfi A. / 143529 / MDP SS Batch 15</span>
         </a>
@@ -18,22 +18,35 @@
         </button>
       </div>
 
-      <div id="menu" class="hidden sm:ml-6 sm:flex sm:space-x-8" *ngIf="authService.isLoggedIn()">
-        <a class="border-transparent text-slate-500 hover:border-indigo-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-150"
-          href="/">
+      <div id="menu" class="hidden sm:ml-6 sm:flex sm:space-x-2" *ngIf="authService.isLoggedIn()">
+        <a class="nav-link" [class.nav-active]="isActive('/dashboard')" routerLink="/dashboard">
+          <i class="fa-solid fa-gauge-high nav-icon"></i>
+          Dashboard
+        </a>
+        <a class="nav-link" [class.nav-active]="isActive('/students')" routerLink="/students" *ngIf="userRole !== 'STUDENT'">
+          <i class="fa-solid fa-users nav-icon"></i>
           Students
         </a>
-        <a class="border-transparent text-slate-500 hover:border-indigo-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-150"
-          href="/projects">
+        <a class="nav-link" [class.nav-active]="isActive('/projects')" routerLink="/projects" *ngIf="userRole !== 'STUDENT'">
+          <i class="fa-solid fa-diagram-project nav-icon"></i>
           Projects
         </a>
-        <a class="border-transparent text-slate-500 hover:border-indigo-500 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-150"
-          href="/assignment">
+        <a class="nav-link" [class.nav-active]="isActive('/assignment')" routerLink="/assignment" *ngIf="userRole !== 'STUDENT'">
+          <i class="fa-solid fa-clipboard-check nav-icon"></i>
           Assignment
         </a>
-        <div class="flex items-center">
-          <button (click)="logout()"
-            class="ml-4 text-slate-500 hover:text-red-600 font-medium text-sm transition-colors duration-150 cursor-pointer border-0 bg-transparent focus:outline-none">
+        <a class="nav-link" [class.nav-active]="isActive('/my-submissions')" routerLink="/my-submissions" *ngIf="userRole === 'STUDENT'">
+          <i class="fa-solid fa-file-arrow-up nav-icon"></i>
+          My Submissions
+        </a>
+        <div class="flex items-center ml-2 gap-2">
+          <!-- Theme Toggle Button -->
+          <button (click)="toggleTheme()" class="theme-toggle" [title]="isDarkMode ? 'Switch to Light Theme' : 'Switch to Dark Theme'">
+            <i class="fa-solid" [class.fa-sun]="!isDarkMode" [class.fa-moon]="isDarkMode"></i>
+          </button>
+
+          <button (click)="logout()" class="nav-logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
             Logout
           </button>
         </div>
@@ -41,3 +54,98 @@
     </div>
   </nav>
 </div>
+
+<style>
+/* ===== NAV LINKS ===== */
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    margin: auto 0;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    border: 1.5px solid transparent;
+}
+
+.nav-icon {
+    font-size: 0.75rem;
+}
+
+.nav-link:hover {
+    color: #4f46e5;
+    background: #eef2ff;
+}
+
+/* ===== ACTIVE STATE ===== */
+.nav-active {
+    color: #4f46e5 !important;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff) !important;
+    border-color: #c7d2fe !important;
+    font-weight: 600 !important;
+}
+
+.nav-active .nav-icon {
+    color: #6366f1;
+}
+
+/* ===== LOGOUT ===== */
+.nav-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #64748b;
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+.nav-logout:hover {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+/* ===== THEME TOGGLE BUTTON ===== */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: #64748b;
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    box-shadow: none !important;
+}
+
+.theme-toggle:hover {
+    color: #4f46e5;
+    background: #eef2ff;
+}
+
+body.dark .theme-toggle {
+    color: #94a3b8;
+}
+
+body.dark .theme-toggle:hover {
+    color: #f59e0b;
+    background: #334155;
+}
+</style>

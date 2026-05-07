@@ -1,0 +1,170 @@
+<div class="submissions-page">
+    <!-- Student Header Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-content">
+            <div class="welcome-text">
+                <h1>My Projects & Submissions 🎓</h1>
+                <p>Welcome, <strong>{{ studentName }}</strong>. Manage and submit your academic project assignments here.</p>
+            </div>
+            <div class="welcome-decoration">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Box -->
+    <div class="main-card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-folder-open"></i> Assigned Projects</h2>
+            <span class="badge-count">{{ assignedProjects.length }} Total</span>
+        </div>
+
+        <div class="card-body">
+            <!-- Loading Indicator -->
+            <div *ngIf="isLoading" class="loading-state">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <p>Fetching assigned projects...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!isLoading && assignedProjects.length === 0" class="empty-state">
+                <i class="fa-solid fa-clipboard-question"></i>
+                <h3>No projects assigned yet</h3>
+                <p>When an admin or lecturer assigns projects to you, they will appear here with deadlines.</p>
+            </div>
+
+            <!-- Projects Grid -->
+            <div *ngIf="!isLoading && assignedProjects.length > 0" class="projects-grid">
+                <div *ngFor="let item of assignedProjects" class="project-card" [class.graded-border]="item.status === 'GRADED'">
+                    <!-- Card Top Header -->
+                    <div class="project-card-header">
+                        <div class="project-icon-box">
+                            <i class="fa-solid fa-cube"></i>
+                        </div>
+                        <div class="project-title-meta">
+                            <h3>{{ item.project?.name }}</h3>
+                            <span class="project-id">ID: #{{ item.project?.id }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body Dates/Details -->
+                    <div class="project-card-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Start Date:</span>
+                            <span class="detail-val">
+                                <i class="fa-solid fa-calendar"></i> {{ formatDate(item.startDate) }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Deadline:</span>
+                            <span class="detail-val" [class.overdue-text]="getProjectStatus(item) === 'overdue'">
+                                <i class="fa-solid fa-flag"></i> {{ formatDate(item.endDate) }}
+                            </span>
+                        </div>
+                        <div class="detail-row time-remaining-row">
+                            <span class="detail-label">Time Remaining:</span>
+                            <span class="detail-val time-rem-badge" [class]="'time-rem-' + getProjectStatus(item)">
+                                {{ getTimeRemaining(item) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Submission Status Info (if Submitted or Graded) -->
+                    <div class="submission-meta-box" *ngIf="item.status !== 'ASSIGNED'">
+                        <div class="meta-inner-row">
+                            <span class="meta-lbl">GitHub Repository:</span>
+                            <a [href]="item.submissionUrl" target="_blank" class="meta-link">
+                                <i class="fa-brands fa-github"></i> View Repo
+                            </a>
+                        </div>
+                        <div class="meta-inner-row" *ngIf="item.submissionText">
+                            <span class="meta-lbl">Notes:</span>
+                            <span class="meta-txt">"{{ item.submissionText }}"</span>
+                        </div>
+                    </div>
+
+                    <!-- Grading Section (If Graded) -->
+                    <div class="grading-summary-box" *ngIf="item.status === 'GRADED'">
+                        <div class="grade-badge">
+                            <span class="grade-lbl">Score</span>
+                            <span class="grade-val">{{ item.grade }}</span>
+                        </div>
+                        <div class="feedback-bubble" *ngIf="item.feedback">
+                            <i class="fa-solid fa-quote-left"></i>
+                            <p class="feedback-txt">{{ item.feedback }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Action Footer -->
+                    <div class="project-card-footer">
+                        <!-- Badges -->
+                        <div class="status-badge-container">
+                            <span class="status-pill status-assigned" *ngIf="item.status === 'ASSIGNED'">
+                                <i class="fa-solid fa-hourglass-start"></i> Assigned
+                            </span>
+                            <span class="status-pill status-submitted" *ngIf="item.status === 'SUBMITTED'">
+                                <i class="fa-solid fa-circle-check"></i> Submitted
+                            </span>
+                            <span class="status-pill status-graded" *ngIf="item.status === 'GRADED'">
+                                <i class="fa-solid fa-award"></i> Graded
+                            </span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <button *ngIf="item.status === 'ASSIGNED'" (click)="openSubmitModal(item)" class="btn-submit-action">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Project
+                        </button>
+                        <button *ngIf="item.status === 'SUBMITTED'" (click)="openSubmitModal(item)" class="btn-resubmit-action">
+                            <i class="fa-solid fa-rotate-right"></i> Resubmit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Project Dialog / Modal Overlay -->
+    <div class="modal-backdrop" *ngIf="showSubmitModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-paper-plane"></i> Submit Deliverables</h3>
+                <button (click)="closeSubmitModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-subheader">
+                <span class="proj-title-modal">{{ selectedProject?.project?.name }}</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="submissionUrl">
+                        <i class="fa-brands fa-github"></i> Repository URL <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="url" 
+                        id="submissionUrl" 
+                        [(ngModel)]="submissionUrl" 
+                        placeholder="e.g., https://github.com/username/project-repo"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="submissionText">
+                        <i class="fa-solid fa-comment-dots"></i> Notes / Comments
+                    </label>
+                    <textarea 
+                        id="submissionText" 
+                        [(ngModel)]="submissionText" 
+                        placeholder="Add details, instructions, or notes for the lecturer..."
+                        rows="4"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button (click)="closeSubmitModal()" class="btn-cancel" [disabled]="isSubmitting">Cancel</button>
+                <button (click)="submitDeliverable()" class="btn-confirm" [disabled]="isSubmitting">
+                    <span *ngIf="!isSubmitting"><i class="fa-solid fa-cloud-arrow-up"></i> Submit</span>
+                    <span *ngIf="isSubmitting"><i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

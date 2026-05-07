@@ -1,6 +1,5 @@
-package com.satya.assignment.repository;
+package com.satya.assignment.user;
 
-import com.satya.assignment.model.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

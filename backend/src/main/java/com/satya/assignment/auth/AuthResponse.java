@@ -1,4 +1,4 @@
-package com.satya.assignment.dto;
+package com.satya.assignment.auth;
 
 public class AuthResponse {
     private String token;

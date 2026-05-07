@@ -131,7 +131,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-# Create a new project
+# Create a new project (JSON Fallback)
 POST {{baseUrl}}/projects/
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -139,6 +139,41 @@ Authorization: Bearer {{token}}
 {
     "name": "Web Development 101"
 }
+
+###
+
+# Create a new project (With PDF & Image - Multipart form-data)
+POST {{baseUrl}}/projects/
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary-string
+
+--boundary-string
+Content-Disposition: form-data; name="name"
+
+Advanced AI Systems
+--boundary-string
+Content-Disposition: form-data; name="pdf"; filename="syllabus.pdf"
+Content-Type: application/pdf
+
+< ./syllabus.pdf
+--boundary-string
+Content-Disposition: form-data; name="image"; filename="cover.png"
+Content-Type: image/png
+
+< ./cover.png
+--boundary-string--
+
+###
+
+# Get Project PDF file
+GET {{baseUrl}}/projects/1/pdf
+Authorization: Bearer {{token}}
+
+###
+
+# Get Project Image file
+GET {{baseUrl}}/projects/1/image
+Authorization: Bearer {{token}}
 
 ###
 
@@ -151,6 +186,7 @@ Authorization: Bearer {{token}}
     "name": "Advanced Web Development"
 }
 
+
 ###
 
 # Delete a project
@@ -159,9 +195,43 @@ Authorization: Bearer {{token}}
 
 
 ### ==========================================
-### 5. ASSIGNMENT API
+5. ASSIGNMENT API
 ### ==========================================
 
 # Auto-assign projects to students based on average score
 GET {{baseUrl}}/students/assignment
 Authorization: Bearer {{token}}
+
+
+### ==========================================
+### 6. SUBMISSIONS AND GRADING API
+### ==========================================
+
+# Get project details with dates, status, grade, and feedback for a student
+GET {{baseUrl}}/students/1/projectdetails
+Authorization: Bearer {{token}}
+
+###
+
+# Submit a project assignment (Student role)
+POST {{baseUrl}}/students/1/projects/1/submit
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "submissionUrl": "https://github.com/student/my-project",
+    "submissionText": "Here is my completed task, please review it."
+}
+
+###
+
+# Grade a project submission and write feedback (Admin role)
+POST {{baseUrl}}/students/1/projects/1/grade
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "grade": 90.0,
+    "feedback": "Excellent work! Code is neat and structure is perfect."
+}
+

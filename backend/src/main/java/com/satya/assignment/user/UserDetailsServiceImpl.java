@@ -1,7 +1,5 @@
-package com.satya.assignment.security;
+package com.satya.assignment.user;
 
-import com.satya.assignment.model.AppUser;
-import com.satya.assignment.repository.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

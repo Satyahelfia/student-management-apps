@@ -1,10 +1,10 @@
-package com.satya.assignment.model;
+package com.satya.assignment.student;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.ArrayList;
+import com.satya.assignment.project.Project;
+
 @Entity
 @Table(name="student")
 public class Student {
@@ -16,6 +16,7 @@ public class Student {
 
     @Column(name = "average")
     private double average;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "student_project",
@@ -23,7 +24,7 @@ public class Student {
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     @OrderColumn(name = "project_order")
-    private List<Project> projects = new java.util.ArrayList<>();
+    private List<Project> projects = new ArrayList<>();
 
     public int getId() {
         return id;

@@ -1,0 +1,227 @@
+<div class="modal-overlay" *ngIf="show" (click)="onOverlayClick($event)">
+    <div class="modal-container" [class]="'modal-' + type">
+        <!-- Icon -->
+        <div class="modal-icon-wrapper">
+            <div class="modal-icon" *ngIf="type === 'delete'">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div class="modal-icon" *ngIf="type === 'save'">
+                <i class="fa-solid fa-floppy-disk"></i>
+            </div>
+            <div class="modal-icon" *ngIf="type === 'create'">
+                <i class="fa-solid fa-plus-circle"></i>
+            </div>
+            <div class="modal-icon" *ngIf="type === 'info'">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="modal-content">
+            <h3>{{ title }}</h3>
+            <p>{{ message }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="onCancel()" [disabled]="isLoading">
+                {{ cancelText }}
+            </button>
+            <button class="btn-confirm" [class]="'btn-confirm-' + type" (click)="onConfirm()" [disabled]="isLoading">
+                <span *ngIf="!isLoading">{{ confirmText }}</span>
+                <span *ngIf="isLoading" class="loading-content">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Processing...
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== OVERLAY ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ===== CONTAINER ===== */
+.modal-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.04);
+    animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ===== ICON ===== */
+.modal-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+/* Delete variant */
+.modal-delete .modal-icon {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    color: #dc2626;
+}
+
+/* Save variant */
+.modal-save .modal-icon {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #4f46e5;
+}
+
+/* Create variant */
+.modal-create .modal-icon {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    color: #059669;
+}
+
+/* Info variant */
+.modal-info .modal-icon {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    color: #0284c7;
+}
+
+/* ===== CONTENT ===== */
+.modal-content h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.015em;
+}
+
+.modal-content p {
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ===== ACTIONS ===== */
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-cancel {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+}
+
+.btn-cancel:hover:not(:disabled) {
+    background: #e2e8f0 !important;
+}
+
+.btn-confirm {
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Confirm button variants */
+.btn-confirm-delete {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
+}
+
+.btn-confirm-delete:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+.btn-confirm-save {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
+}
+
+.btn-confirm-save:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+.btn-confirm-create {
+    background: linear-gradient(135deg, #059669, #0891b2) !important;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3) !important;
+}
+
+.btn-confirm-create:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+.btn-confirm-info {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+}
+
+.btn-confirm-info:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+.modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.loading-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+@media (max-width: 480px) {
+    .modal-container { padding: 1.5rem; }
+    .modal-actions { flex-direction: column; }
+}
+</style>

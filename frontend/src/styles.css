@@ -43,3 +43,227 @@
     @apply text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:tracking-tight mb-4;
   }
 }
+
+/* ==========================================================================
+   THEMING & COLOR SYSTEM (Light & Dark Mode)
+   ========================================================================== */
+
+:root {
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+  --bg-hover: #f8fafc;
+  --bg-input: #ffffff;
+}
+
+body.dark {
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --bg-header: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --border-light: #1e293b;
+  --bg-hover: #0f172a;
+  --bg-input: #0f172a;
+}
+
+/* Global Transition Effects */
+body {
+  background-color: var(--bg-app) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease !important;
+}
+
+/* Typography */
+body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
+  color: var(--text-primary) !important;
+}
+
+body.dark .title, body.dark label {
+  color: var(--text-primary) !important;
+}
+
+/* Cards & Sections */
+.card, .settings-card, .assign-card, .table-card, .dashboard-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease !important;
+}
+
+/* Input Fields & Dropdowns */
+input, select, textarea {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.65;
+}
+
+/* Tables Styling */
+table {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+thead, th {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+td {
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+tbody tr {
+  transition: background-color 0.15s ease !important;
+}
+
+tbody tr:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Back Button styling */
+.btn-back {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-back:hover {
+  background-color: var(--bg-hover) !important;
+  color: #6366f1 !important;
+}
+
+/* Modals */
+app-confirm-modal .confirm-modal-card, .grade-modal-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.grade-modal-header {
+  background-color: var(--bg-hover) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+.grade-modal-footer {
+  background-color: var(--bg-hover) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+.btn-cancel {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.text-box {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+}
+
+.comments-text {
+  color: var(--text-primary) !important;
+}
+
+.comments-text.empty-comments {
+  color: var(--text-secondary) !important;
+}
+
+/* Navigation / Header overrides */
+app-header .bg-white {
+  background-color: var(--bg-header) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease !important;
+}
+
+app-header .text-slate-500, app-header .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+.nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-hover) !important;
+  color: #4f46e5 !important;
+}
+
+.nav-active {
+  color: #4f46e5 !important;
+  background: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+}
+
+.nav-logout {
+  color: var(--text-secondary) !important;
+}
+
+/* Dashboard-specific Styles */
+.stat-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.stat-value {
+  color: var(--text-primary) !important;
+}
+
+.stat-label {
+  color: var(--text-secondary) !important;
+}
+
+.action-item:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.action-title {
+  color: var(--text-primary) !important;
+}
+
+.top-student-item, .project-item {
+  border-bottom-color: var(--border-color) !important;
+}
+
+.student-name, .project-name {
+  color: var(--text-primary) !important;
+}
+
+.student-rank {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-secondary) !important;
+}
+
+.rank-1, .rank-2, .rank-3 {
+  color: white !important;
+}
+
+/* Info banner in student projects */
+.info-banner {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.info-name {
+  color: var(--text-primary) !important;
+}
+
+.info-meta {
+  color: var(--text-secondary) !important;
+}
+
+.info-meta strong {
+  color: var(--text-primary) !important;
+}
