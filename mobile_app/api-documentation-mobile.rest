@@ -1,0 +1,145 @@
+### ==========================================
+### API Documentation - Mobile App (REST Client)
+### ==========================================
+### Menggunakan loopback IP 127.0.0.1:9090 karena
+### dihubungkan menggunakan kabel USB dan ADB reverse port forwarding.
+###
+### 📱 Persiapan Sebelum Mencoba di HP:
+### 1. Hubungkan HP Android ke Laptop menggunakan kabel USB.
+### 2. Jalankan perintah di Terminal laptop Anda:
+###    adb reverse tcp:9090 tcp:9090
+### 3. Jalankan request "Login Admin" di bawah.
+### 4. Salin token dari hasil respons, tempel di variabel @token di bawah.
+### 5. Jalankan request lainnya dengan lancar!
+### ==========================================
+
+@baseUrl = http://127.0.0.1:9090
+@token = your_jwt_token_here
+
+### ==========================================
+### 1. AUTHENTICATION (LOGIN)
+### ==========================================
+
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+
+###
+
+### ==========================================
+### 2. CONFIGURATION (SETTINGS)
+### ==========================================
+
+# Get Max Projects per Student
+# @name getMaxProjects
+GET {{baseUrl}}/students/config/max_projects
+Authorization: Bearer {{token}}
+
+###
+
+# Update Max Projects per Student
+# @name updateMaxProjects
+PUT {{baseUrl}}/students/config/max_projects
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+5
+
+###
+
+### ==========================================
+### 3. STUDENTS CRUD API
+### ==========================================
+
+# Get All Students
+# @name getStudents
+GET {{baseUrl}}/students/
+Authorization: Bearer {{token}}
+
+###
+
+# Create a New Student
+# @name createStudent
+POST {{baseUrl}}/students/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Budi Santoso",
+    "average": 8.5
+}
+
+###
+
+# Update Student Details
+# @name updateStudent
+PUT {{baseUrl}}/students/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Budi Santoso (Edited)",
+    "average": 9.0
+}
+
+###
+
+# Delete Student
+# @name deleteStudent
+DELETE {{baseUrl}}/students/1
+Authorization: Bearer {{token}}
+
+###
+
+### ==========================================
+### 4. PROJECTS CRUD API
+### ==========================================
+
+# Get All Projects
+# @name getProjects
+GET {{baseUrl}}/projects/
+Authorization: Bearer {{token}}
+
+###
+
+# Create Project with Files (Multipart Request)
+# Catatan: Di VS Code REST Client, unggah file disimulasikan seperti di bawah
+# @name createProject
+POST {{baseUrl}}/projects/
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="name"
+
+Proyek Akhir Mobile
+--WebAppBoundary--
+
+###
+
+# Delete Project
+# @name deleteProject
+DELETE {{baseUrl}}/projects/1
+Authorization: Bearer {{token}}
+
+###
+
+### ==========================================
+### 5. ASSIGNMENTS API (PENUGASAN PROYEK)
+### ==========================================
+
+# Assign Project to Student
+# @name assignProject
+POST {{baseUrl}}/students/1/projects/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "startDate": "2026-05-10",
+    "endDate": "2026-06-10"
+}

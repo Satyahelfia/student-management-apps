@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Management Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Typography Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Geist:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-tertiary-fixed": "#250059",
+                  "on-error": "#690005",
+                  "on-primary-fixed": "#001d36",
+                  "error-container": "#93000a",
+                  "primary-container": "#2196f3",
+                  "on-secondary-container": "#004650",
+                  "secondary-fixed": "#a1efff",
+                  "surface": "#131313",
+                  "surface-bright": "#393939",
+                  "on-secondary": "#00363e",
+                  "on-primary-container": "#002c4f",
+                  "surface-dim": "#131313",
+                  "inverse-primary": "#0061a4",
+                  "surface-tint": "#9ecaff",
+                  "surface-container-highest": "#353534",
+                  "on-background": "#e5e2e1",
+                  "background": "#131313",
+                  "tertiary-container": "#a57af9",
+                  "on-surface-variant": "#bfc7d4",
+                  "outline": "#89919d",
+                  "tertiary": "#d3bbff",
+                  "tertiary-fixed": "#ebddff",
+                  "on-tertiary": "#3f008d",
+                  "secondary-container": "#00bcd4",
+                  "inverse-surface": "#e5e2e1",
+                  "primary-fixed": "#d1e4ff",
+                  "primary-fixed-dim": "#9ecaff",
+                  "primary": "#9ecaff",
+                  "error": "#ffb4ab",
+                  "on-surface": "#e5e2e1",
+                  "surface-container-high": "#2a2a2a",
+                  "on-primary": "#003258",
+                  "secondary": "#44d8f1",
+                  "outline-variant": "#404752",
+                  "surface-variant": "#353534",
+                  "on-tertiary-container": "#39007f",
+                  "tertiary-fixed-dim": "#d3bbff",
+                  "on-secondary-fixed-variant": "#004e59",
+                  "surface-container-lowest": "#0e0e0e",
+                  "on-secondary-fixed": "#001f25",
+                  "on-primary-fixed-variant": "#00497d",
+                  "on-error-container": "#ffdad6",
+                  "surface-container": "#201f1f",
+                  "secondary-fixed-dim": "#44d8f1",
+                  "surface-container-low": "#1c1b1b",
+                  "inverse-on-surface": "#313030",
+                  "on-tertiary-fixed-variant": "#5727a6"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.125rem",
+                  "lg": "0.25rem",
+                  "xl": "0.5rem",
+                  "full": "0.75rem"
+          },
+          "spacing": {
+                  "lg": "48px",
+                  "xl": "80px",
+                  "sm": "12px",
+                  "xs": "4px",
+                  "md": "24px",
+                  "base": "8px",
+                  "margin-mobile": "16px",
+                  "gutter": "24px",
+                  "margin-desktop": "64px"
+          },
+          "fontFamily": {
+                  "headline-lg": ["Hanken Grotesk"],
+                  "label-md": ["JetBrains Mono"],
+                  "headline-lg-mobile": ["Hanken Grotesk"],
+                  "body-lg": ["Geist"],
+                  "display-lg": ["Hanken Grotesk"],
+                  "body-md": ["Geist"],
+                  "label-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+                  "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                  "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "display-lg": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile py-base bg-surface dark:bg-surface-dim fixed top-0 z-50">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="Satya Helfi" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7vjHlww6sqs8si1ydzPp_QepFQDu2prIgtPaMPxcJAylrXkWkEzNEkYhULAFO1mC9Xy-eVu2Vb4FYrdTuGDFU0gL-rk60SxZtbMSxlk50oajCGqHNIHtEI5PGNNdG5Ja7bvxzmUO6xPPIMPDvP3eJUL0d0A680295UUsc_E5WpLcvdvXrQuvQrzw-pqhWgnUCBGmkqxEe8JIrvcegkwlH5z2Vr2OJGVzm-1Qc5V2awT05IqUwCnIsn_Fpnz3NZjOM508DQ3TGd8Y_"/>
+</div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface dark:text-on-surface">Student Management</span>
+</div>
+<div class="p-xs hover:bg-surface-variant/10 transition-colors duration-200 rounded-full cursor-pointer">
+<span class="material-symbols-outlined text-tertiary-container dark:text-tertiary">settings</span>
+</div>
+</header>
+<main class="pt-24 px-margin-mobile space-y-md">
+<!-- Welcome Banner (Bento Style) -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-br from-tertiary-container to-on-tertiary-container p-md shadow-lg min-h-[160px] flex flex-col justify-end">
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-white mb-xs">Welcome back! 👋</h2>
+<p class="font-body-md text-white/80 max-w-[240px]">Here's an overview of your student management system.</p>
+</div>
+<span class="material-symbols-outlined absolute top-md right-md text-6xl text-white/20">monitoring</span>
+</section>
+<!-- Stats Grid (Fluid Layout) -->
+<section class="grid grid-cols-2 gap-base">
+<!-- Card 1 -->
+<div class="glass-card p-base rounded-xl space-y-xs flex flex-col items-start">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">group</span>
+</div>
+<p class="font-label-sm text-on-surface-variant">TOTAL STUDENTS</p>
+<p class="font-headline-lg text-primary">14</p>
+</div>
+<!-- Card 2 -->
+<div class="glass-card p-base rounded-xl space-y-xs flex flex-col items-start">
+<div class="w-10 h-10 rounded-lg bg-secondary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">account_tree</span>
+</div>
+<p class="font-label-sm text-on-surface-variant">TOTAL PROJECTS</p>
+<p class="font-headline-lg text-secondary">10</p>
+</div>
+<!-- Card 3 -->
+<div class="glass-card p-base rounded-xl space-y-xs flex flex-col items-start">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">star</span>
+</div>
+<p class="font-label-sm text-on-surface-variant">AVERAGE SCORE</p>
+<p class="font-headline-lg text-tertiary">7.17</p>
+</div>
+<!-- Card 4 -->
+<div class="glass-card p-base rounded-xl space-y-xs flex flex-col items-start">
+<div class="w-10 h-10 rounded-lg bg-error-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-error">tune</span>
+</div>
+<p class="font-label-sm text-on-surface-variant">MAX PROJECTS</p>
+<p class="font-headline-lg text-error">3</p>
+</div>
+</section>
+<!-- Quick Actions -->
+<section class="space-y-base">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-body-lg">bolt</span>
+<h3 class="font-headline-lg-mobile text-on-surface">Quick Actions</h3>
+</div>
+<div class="grid grid-cols-1 gap-base">
+<button class="glass-card p-md rounded-xl flex items-center justify-between hover:bg-surface-variant/20 transition-all active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person_add</span>
+</div>
+<div class="text-left">
+<p class="font-body-md font-bold text-on-surface">Add Student</p>
+<p class="font-label-sm text-on-surface-variant">Register a new student</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="glass-card p-md rounded-xl flex items-center justify-between hover:bg-surface-variant/20 transition-all active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">assignment</span>
+</div>
+<div class="text-left">
+<p class="font-body-md font-bold text-on-surface">Manage Projects</p>
+<p class="font-label-sm text-on-surface-variant">View and create projects</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Top Students List Preview -->
+<section class="space-y-base">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary text-body-lg">emoji_events</span>
+<h3 class="font-headline-lg-mobile text-on-surface">Top Students</h3>
+</div>
+<button class="text-tertiary font-label-md">View All</button>
+</div>
+<div class="glass-card rounded-xl overflow-hidden">
+<!-- Student Item -->
+<div class="flex items-center justify-between p-md border-b border-white/5 last:border-0">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-tertiary/20 flex items-center justify-center font-label-md text-tertiary">1</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">adefveag</p>
+<p class="font-label-sm text-on-surface-variant">2 projects</p>
+</div>
+</div>
+<p class="font-headline-lg text-tertiary">9</p>
+</div>
+<!-- Student Item -->
+<div class="flex items-center justify-between p-md border-b border-white/5 last:border-0">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-outline-variant/20 flex items-center justify-center font-label-md text-outline">2</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">Satya Helfi</p>
+<p class="font-label-sm text-on-surface-variant">0 projects</p>
+</div>
+</div>
+<p class="font-headline-lg text-on-surface-variant">9</p>
+</div>
+<!-- Student Item -->
+<div class="flex items-center justify-between p-md border-b border-white/5 last:border-0">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-on-tertiary-fixed-variant/20 flex items-center justify-center font-label-md text-tertiary-fixed-dim">3</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">Shera</p>
+<p class="font-label-sm text-on-surface-variant">2 projects</p>
+</div>
+</div>
+<p class="font-headline-lg text-secondary">8.8</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-xs py-base bg-surface-container dark:bg-surface-container-high rounded-t-xl shadow-lg">
+<!-- Active Destination: Dashboard -->
+<a class="flex flex-col items-center justify-center bg-tertiary-container/20 text-tertiary-container dark:text-tertiary rounded-full px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<!-- Inactive Destinations -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-tertiary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-sm text-label-sm">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-tertiary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-sm text-label-sm">Projects</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-tertiary transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-label-sm text-label-sm">Assignments</span>
+</a>
+</nav>
+</body></html>

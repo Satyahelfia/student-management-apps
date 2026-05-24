@@ -68,6 +68,16 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateProject(id, projectDetails));
     }
 
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<Project> updateProjectWithFiles(
+            @PathVariable int id,
+            @RequestParam("name") String name,
+            @RequestParam(value = "pdf", required = false) org.springframework.web.multipart.MultipartFile pdfFile,
+            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile imageFile) throws java.io.IOException {
+        Project project = projectService.updateProjectWithFiles(id, name, pdfFile, imageFile);
+        return ResponseEntity.ok(project);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProject(@PathVariable int id) {
         projectService.deleteProject(id);
