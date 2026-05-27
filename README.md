@@ -74,9 +74,32 @@ erDiagram
     }
 
     student_project {
-        int student_id FK
-        int project_id FK
-        int project_order
+        int student_id PK "FK"
+        int project_id PK "FK"
+    }
+
+    student_project_detail {
+        int id PK "AUTO_INCREMENT"
+        int student_id "FK"
+        int project_id "FK"
+        datetime start_date
+        datetime end_date
+        varchar status "ASSIGNED, SUBMITTED, GRADED"
+        double grade
+        varchar feedback
+        varchar submission_url
+        varchar submission_text
+        datetime submitted_at
+        varchar book_id "FK (Logical to mylib-be)"
+    }
+
+    book {
+        varchar id PK "UUID"
+        varchar title
+        varchar author
+        varchar isbn
+        varchar synopsis
+        varchar thumbnail_url
     }
 
     app_user {
@@ -86,14 +109,18 @@ erDiagram
         varchar role
     }
 
-    student ||--o{ student_project : "has"
-    project ||--o{ student_project : "assigned to"
+    student ||--o{ student_project : "ManyToMany enrollment"
+    project ||--o{ student_project : "ManyToMany enrollment"
+    student ||--o{ student_project_detail : "has assignment dates/grades"
+    project ||--o{ student_project_detail : "assigned under dates"
+    student_project_detail }o--..|| book : "references book (Logical BFF)"
 ```
 
 ### Penjelasan Relasi
-- **Student ↔ Project:** Relasi *Many-to-Many* melalui tabel penghubung `student_project`. Satu siswa dapat mengerjakan banyak proyek, dan satu proyek dapat dikerjakan oleh banyak siswa.
-- **student_project:** Tabel *junction/bridge* yang menyimpan pasangan `student_id` dan `project_id`, serta `project_order` untuk menjaga urutan proyek per siswa.
-- **AppUser:** Entitas terpisah untuk autentikasi (login). Tidak memiliki relasi langsung dengan Student atau Project.
+- **Student ↔ Project:** Relasi *Many-to-Many* murni melalui tabel junction `student_project` (kolom `project_order` telah dihapus secara permanen dari skema database agar data tidak melahirkan *gap null*).
+- **student_project_detail:** Tabel pencatatan transaksional penugasan proyek. Menyimpan relasi foreign key dari `student_id` dan `project_id` beserta metadata penugasan seperti rentang waktu aktif (*Start & End Date*), tautan deliverable (*Submission URL* & *Comments*), riwayat penilaian (*Grade* & *Feedback*), dan status tugas.
+- **student_project_detail ↔ Book:** Relasi logis asinkronus berbasis arsitektur **BFF (Backend-For-Frontend)**. Kolom `book_id` menyimpan UUID buku referensi yang dikonsumsi secara dinamis melalui REST API microservice `mylib-be` (tanpa perlu melakukan replikasi tabel buku di database lokal).
+- **AppUser:** Entitas kredensial terpisah untuk modul keamanan dan autentikasi login (ADMIN / STUDENT).
 
 ---
 
