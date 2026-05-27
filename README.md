@@ -113,7 +113,7 @@ erDiagram
     project ||--o{ student_project : "ManyToMany enrollment"
     student ||--o{ student_project_detail : "has assignment dates/grades"
     project ||--o{ student_project_detail : "assigned under dates"
-    student_project_detail }o--..|| book : "references book (Logical BFF)"
+    student_project_detail }o..|| book : "references book (Logical BFF)"
 ```
 
 ### Penjelasan Relasi
