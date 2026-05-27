@@ -1,4 +1,4 @@
-package com.satya.assignment.user;
+package com.satya.assignment.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

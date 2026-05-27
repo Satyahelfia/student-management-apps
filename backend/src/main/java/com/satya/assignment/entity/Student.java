@@ -1,9 +1,8 @@
-package com.satya.assignment.student;
+package com.satya.assignment.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 import java.util.ArrayList;
-import com.satya.assignment.project.Project;
+import java.util.List;
 
 @Entity
 @Table(name="student")

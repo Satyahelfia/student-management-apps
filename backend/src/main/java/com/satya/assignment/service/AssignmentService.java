@@ -1,14 +1,14 @@
-package com.satya.assignment.assignment;
-
-import com.satya.assignment.project.Project;
-import com.satya.assignment.student.Student;
-import com.satya.assignment.student.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+package com.satya.assignment.service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.satya.assignment.entity.Project;
+import com.satya.assignment.entity.Student;
+import com.satya.assignment.repository.StudentRepository;
 
 @Service
 public class AssignmentService {

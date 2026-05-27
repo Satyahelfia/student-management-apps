@@ -1,10 +1,12 @@
-package com.satya.assignment.project;
+package com.satya.assignment.service;
 
-import com.satya.assignment.common.exception.ResourceNotFoundException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.satya.assignment.entity.Project;
+import com.satya.assignment.repository.ProjectRepository;
+import com.satya.assignment.web.error.ResourceNotFoundException;
 
 @Service
 public class ProjectService {

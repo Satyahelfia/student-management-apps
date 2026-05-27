@@ -1,7 +1,7 @@
-package com.satya.assignment.project;
+package com.satya.assignment.entity;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
@@ -15,7 +15,7 @@ public class Project{
 
     @ManyToMany(mappedBy = "projects")
     @JsonIgnore
-    private List<com.satya.assignment.student.Student> students;
+    private List<Student> students;
 
     @Lob
     @Column(name="pdf_data", columnDefinition="LONGBLOB")

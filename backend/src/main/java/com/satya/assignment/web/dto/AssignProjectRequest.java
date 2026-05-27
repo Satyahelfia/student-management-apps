@@ -1,4 +1,4 @@
-package com.satya.assignment.student;
+package com.satya.assignment.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;

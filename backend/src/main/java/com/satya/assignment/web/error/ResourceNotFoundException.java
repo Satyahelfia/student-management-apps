@@ -1,4 +1,4 @@
-package com.satya.assignment.common.exception;
+package com.satya.assignment.web.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

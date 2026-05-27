@@ -1,4 +1,4 @@
-package com.satya.assignment.auth;
+package com.satya.assignment.web.dto;
 
 public class AuthRequest {
     private String username;

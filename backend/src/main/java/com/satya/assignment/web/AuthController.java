@@ -1,13 +1,17 @@
-package com.satya.assignment.auth;
+package com.satya.assignment.web;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.satya.assignment.service.AuthService;
+import com.satya.assignment.web.dto.AuthRequest;
+import com.satya.assignment.web.dto.AuthResponse;
+import com.satya.assignment.web.dto.RegisterRequest;
 
 @RestController
 @RequestMapping("/auth")
