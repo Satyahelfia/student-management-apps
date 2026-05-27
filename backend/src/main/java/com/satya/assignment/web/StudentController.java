@@ -77,8 +77,9 @@ public class StudentController {
 
         java.time.LocalDateTime startDate = (request != null) ? request.getStartDate() : null;
         java.time.LocalDateTime endDate = (request != null) ? request.getEndDate() : null;
+        String bookId = (request != null) ? request.getBookId() : null;
 
-        Student result = studentService.addProjectToStudent(student_id, project_id, startDate, endDate);
+        Student result = studentService.addProjectToStudent(student_id, project_id, startDate, endDate, bookId);
         if (result == null) {
             Student student = studentService.getStudentById(student_id);
             return ResponseEntity.badRequest().body(student);

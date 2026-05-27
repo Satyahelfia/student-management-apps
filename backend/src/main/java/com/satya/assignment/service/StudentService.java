@@ -39,10 +39,12 @@ public class StudentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student", id));
     }
 
+    @Transactional
     public Student createStudent(Student studentDetails) {
         return studentRepository.save(studentDetails);
     }
 
+    @Transactional
     public Student updateStudent(int id, Student studentDetails) {
         Student student = getStudentById(id);
         student.setName(studentDetails.getName());
@@ -50,6 +52,7 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
+    @Transactional
     public void deleteStudent(int id) {
         Student student = getStudentById(id);
         studentRepository.delete(student);
@@ -75,7 +78,13 @@ public class StudentService {
         return student.getProjects();
     }
 
+    @Transactional
     public Student addProjectToStudent(int studentId, int projectId, LocalDateTime startDate, LocalDateTime endDate) {
+        return addProjectToStudent(studentId, projectId, startDate, endDate, null);
+    }
+
+    @Transactional
+    public Student addProjectToStudent(int studentId, int projectId, LocalDateTime startDate, LocalDateTime endDate, String bookId) {
         Student student = getStudentById(studentId);
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", projectId));
@@ -95,6 +104,7 @@ public class StudentService {
 
         // Save date details in the separate detail table
         StudentProject detail = new StudentProject(studentId, projectId, startDate, endDate);
+        detail.setBookId(bookId);
         studentProjectRepository.save(detail);
 
         return saved;
@@ -140,6 +150,7 @@ public class StudentService {
 
     // ==================== Project Submissions & Grading ====================
 
+    @Transactional
     public StudentProject submitProject(int studentId, int projectId, String submissionUrl, String submissionText) {
         StudentProject detail = studentProjectRepository.findByStudentId(studentId).stream()
                 .filter(d -> d.getProjectId() == projectId)
@@ -153,6 +164,7 @@ public class StudentService {
         return studentProjectRepository.save(detail);
     }
 
+    @Transactional
     public StudentProject gradeProject(int studentId, int projectId, Double grade, String feedback) {
         StudentProject detail = studentProjectRepository.findByStudentId(studentId).stream()
                 .filter(d -> d.getProjectId() == projectId)

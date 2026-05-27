@@ -7,8 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.satya.assignment.entity.AppUser;
 import com.satya.assignment.entity.Student;
+import com.satya.assignment.entity.Project;
 import com.satya.assignment.repository.AppUserRepository;
 import com.satya.assignment.repository.StudentRepository;
+import com.satya.assignment.repository.ProjectRepository;
+import com.satya.assignment.service.StudentService;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -18,6 +24,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private StudentService studentService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -82,6 +94,45 @@ public class DataInitializer implements CommandLineRunner {
                 appUser.setStudentId(profile.getId());
                 appUserRepository.save(appUser);
                 System.out.println("Updated student user account " + stdUsername + " with Student ID: " + profile.getId());
+            }
+        }
+
+        // 4. Seed Projects if not exists
+        String[] projectNames = {
+            "E-Commerce Mobile Application",
+            "IoT Smart Agriculture Dashboard",
+            "Machine Learning Recommendation Engine"
+        };
+
+        for (String projName : projectNames) {
+            Project proj = projectRepository.findAll().stream()
+                    .filter(p -> p.getName().equalsIgnoreCase(projName))
+                    .findFirst()
+                    .orElse(null);
+            
+            if (proj == null) {
+                proj = new Project();
+                proj.setName(projName);
+                projectRepository.save(proj);
+                System.out.println("Project created: " + projName);
+            }
+        }
+
+        // 5. Auto-assign at least one Project to Students to avoid empty Assignment views
+        List<Student> allStudents = studentRepository.findAll();
+        List<Project> allProjects = projectRepository.findAll();
+
+        if (!allStudents.isEmpty() && !allProjects.isEmpty()) {
+            for (int i = 0; i < allStudents.size(); i++) {
+                Student s = allStudents.get(i);
+                // If student has no projects yet, auto-assign one
+                if (s.getProjects().isEmpty()) {
+                    // Distribute projects using modulo
+                    Project p = allProjects.get(i % allProjects.size());
+                    LocalDateTime now = LocalDateTime.now();
+                    studentService.addProjectToStudent(s.getId(), p.getId(), now, now.plusMonths(3));
+                    System.out.println("Auto-assigned project '" + p.getName() + "' to student '" + s.getName() + "'");
+                }
             }
         }
     }

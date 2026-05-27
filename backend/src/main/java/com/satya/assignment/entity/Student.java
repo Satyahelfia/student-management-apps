@@ -22,7 +22,6 @@ public class Student {
             joinColumns = @JoinColumn (name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    @OrderColumn(name = "project_order")
     private List<Project> projects = new ArrayList<>();
 
     public int getId() {
