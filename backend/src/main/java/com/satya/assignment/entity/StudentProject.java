@@ -97,4 +97,10 @@ public class StudentProject {
 
     public String getFeedback() { return feedback; }
     public void setFeedback(String feedback) { this.feedback = feedback; }
+
+    @Column(name = "book_id")
+    private String bookId;
+
+    public String getBookId() { return bookId; }
+    public void setBookId(String bookId) { this.bookId = bookId; }
 }

@@ -23,6 +23,10 @@ export class StudentProjects implements OnInit {
   // Project details with dates
   projectDetails: any[] = [];
 
+  // Books reference list
+  books: any[] = [];
+  selectedBookId: string = '';
+
   // Modal state
   showDeleteModal = false;
   showAssignModal = false;
@@ -47,7 +51,40 @@ export class StudentProjects implements OnInit {
   ngOnInit(): void {
     const id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
     this.student.id = id;
+    this.loadBooks();
     this.getStudentById();
+  }
+
+  loadBooks() {
+    this.studentApi.getBooks().subscribe({
+      next: data => {
+        if (data && Array.isArray(data)) {
+          this.books = data;
+        } else if (data && data.content && Array.isArray(data.content)) {
+          this.books = data.content;
+        } else if (data && data.data && Array.isArray(data.data)) {
+          this.books = data.data;
+        } else {
+          this.books = [];
+        }
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error("Failed to load books reference list:", err);
+      }
+    });
+  }
+
+  getBookTitle(bookId: string): string {
+    if (!bookId) return '';
+    const book = this.books.find(b => b.id === bookId);
+    return book ? book.title : 'Unknown Reference Book';
+  }
+
+  getBookAuthor(bookId: string): string {
+    if (!bookId) return '';
+    const book = this.books.find(b => b.id === bookId);
+    return book ? book.author : '';
   }
 
   goBack() {
@@ -224,6 +261,10 @@ export class StudentProjects implements OnInit {
     this.dateError = '';
     const selectedProjectName = this.availableProjects.find(p => p.id == this.projectId)?.name || '';
     let msg = `Are you sure you want to assign "${selectedProjectName}" to ${this.student.name}?`;
+    if (this.selectedBookId) {
+      const bookTitle = this.getBookTitle(this.selectedBookId);
+      msg += `\n\nReference Book: "${bookTitle}"`;
+    }
     if (this.startDate && this.endDate) {
       msg += `\n\nStart: ${this.formatDate(this.startDate)}\nDeadline: ${this.formatDate(this.endDate)}`;
     }
@@ -236,11 +277,13 @@ export class StudentProjects implements OnInit {
     // Format dates for backend
     const startDateStr = this.startDate ? this.startDate + ':00' : undefined;
     const endDateStr = this.endDate ? this.endDate + ':00' : undefined;
+    const bookIdVal = this.selectedBookId ? this.selectedBookId : undefined;
 
-    this.studentApi.addProjectToStudent(this.student.id, this.projectId, startDateStr, endDateStr).subscribe({
+    this.studentApi.addProjectToStudent(this.student.id, this.projectId, startDateStr, endDateStr, bookIdVal).subscribe({
       next: data => {
         this.showAssignModal = false;
         this.projectId = "";
+        this.selectedBookId = "";
         this.startDate = '';
         this.endDate = '';
         this.dateError = '';
