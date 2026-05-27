@@ -31,12 +31,28 @@ export class StudentApi {
   getAvailableStudentProjects(student_id:any):Observable<Project[]>{
     return this.httpClient.get<Project[]>(this.link+student_id+"/availableprojects")
   } 
-  addProjectToStudent(student_id:any, project_id:any, startDate?:string, endDate?:string):Observable<Student>{
-    const body = { startDate, endDate };
+  addProjectToStudent(student_id:any, project_id:any, startDate?:string, endDate?:string, bookId?:string):Observable<Student>{
+    const body = { startDate, endDate, bookId };
     return this.httpClient.post<Student>(this.link+student_id+"/projects/"+project_id, body)
   }
   deleteProjectFromStudent(student_id: any, project_id: any):Observable<Student>{
     return this.httpClient.delete<Student>(this.link+student_id+"/projects/"+project_id)
+  }
+  getBooks(q?: string, page = 0, size = 100): Observable<any> {
+    let url = environment.BASE_HOST + "/books?page=" + page + "&size=" + size;
+    if (q) {
+      url += "&q=" + encodeURIComponent(q);
+    }
+    return this.httpClient.get<any>(url);
+  }
+  createBook(formData: FormData): Observable<any> {
+    return this.httpClient.post<any>(environment.BASE_HOST + "/books", formData);
+  }
+  updateBook(id: string, formData: FormData): Observable<any> {
+    return this.httpClient.put<any>(environment.BASE_HOST + "/books/" + id, formData);
+  }
+  deleteBook(id: string): Observable<any> {
+    return this.httpClient.delete<any>(environment.BASE_HOST + "/books/" + id);
   }
   getMaxProjectsPerStudent():Observable<Number>{
     return this.httpClient.get<Number>(this.link+"config/max_projects")
