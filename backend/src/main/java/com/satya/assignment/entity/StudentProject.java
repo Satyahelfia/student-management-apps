@@ -1,6 +1,5 @@
-package com.satya.assignment.student;
+package com.satya.assignment.entity;
 
-import com.satya.assignment.project.Project;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

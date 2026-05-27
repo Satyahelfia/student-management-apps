@@ -1,8 +1,10 @@
-package com.satya.assignment.student;
+package com.satya.assignment.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.satya.assignment.entity.StudentProject;
 
 public interface StudentProjectRepository extends JpaRepository<StudentProject, Integer> {
     List<StudentProject> findByStudentId(int studentId);

@@ -1,10 +1,11 @@
-package com.satya.assignment.assignment;
+package com.satya.assignment.web;
 
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import com.satya.assignment.service.AssignmentService;
 
 @RestController
 @RequestMapping("/students")

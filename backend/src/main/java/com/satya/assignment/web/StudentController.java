@@ -1,12 +1,16 @@
-package com.satya.assignment.student;
+package com.satya.assignment.web;
 
-import com.satya.assignment.project.Project;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.satya.assignment.entity.Project;
+import com.satya.assignment.entity.Student;
+import com.satya.assignment.entity.StudentProject;
+import com.satya.assignment.service.StudentService;
+import com.satya.assignment.web.dto.AssignProjectRequest;
 
 @RestController
 @RequestMapping("/students")

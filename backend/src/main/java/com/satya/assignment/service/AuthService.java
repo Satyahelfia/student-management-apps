@@ -1,8 +1,5 @@
-package com.satya.assignment.auth;
+package com.satya.assignment.service;
 
-import com.satya.assignment.security.JwtService;
-import com.satya.assignment.user.AppUser;
-import com.satya.assignment.user.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +9,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.satya.assignment.entity.AppUser;
+import com.satya.assignment.repository.AppUserRepository;
+import com.satya.assignment.security.JwtService;
+import com.satya.assignment.web.dto.AuthRequest;
+import com.satya.assignment.web.dto.AuthResponse;
+import com.satya.assignment.web.dto.RegisterRequest;
 
 @Service
 public class AuthService {

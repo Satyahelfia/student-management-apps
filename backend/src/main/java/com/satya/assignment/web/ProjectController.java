@@ -1,11 +1,13 @@
-package com.satya.assignment.project;
+package com.satya.assignment.web;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.satya.assignment.entity.Project;
+import com.satya.assignment.service.ProjectService;
 
 @RestController
 @RequestMapping("/projects")

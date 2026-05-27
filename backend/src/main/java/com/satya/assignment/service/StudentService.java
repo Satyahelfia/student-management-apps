@@ -1,16 +1,20 @@
-package com.satya.assignment.student;
-
-import com.satya.assignment.common.exception.ResourceNotFoundException;
-import com.satya.assignment.project.Project;
-import com.satya.assignment.project.ProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+package com.satya.assignment.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.satya.assignment.entity.Project;
+import com.satya.assignment.entity.Student;
+import com.satya.assignment.entity.StudentProject;
+import com.satya.assignment.repository.ProjectRepository;
+import com.satya.assignment.repository.StudentProjectRepository;
+import com.satya.assignment.repository.StudentRepository;
+import com.satya.assignment.web.error.ResourceNotFoundException;
 
 @Service
 public class StudentService {
